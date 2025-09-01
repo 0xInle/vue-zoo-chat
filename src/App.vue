@@ -112,6 +112,5 @@ onUpdated(() => {
   max-width: fit-content;
   background-color: #404045;
   border-radius: 20px;
-  white-space: pre-wrap;
 }
 </style>
