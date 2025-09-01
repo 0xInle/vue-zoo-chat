@@ -1,33 +1,42 @@
 # .
 
-This template should help get you started developing with Vue 3 in Vite.
+Этот шаблон поможет вам начать разработку на **Vue 3** с **Vite**.
 
-## Recommended IDE Setup
+## Рекомендованная IDE
 
-[VSCode](https://code.visualstudio.com/) + [Volar](https://marketplace.visualstudio.com/items?itemName=Vue.volar) (and disable Vetur).
+[VSCode](https://code.visualstudio.com/) + [Volar](https://marketplace.visualstudio.com/items?itemName=Vue.volar) (Vetur отключить).
 
-## Type Support for `.vue` Imports in TS
+## Поддержка типов для `.vue` в TypeScript
 
-TypeScript cannot handle type information for `.vue` imports by default, so we replace the `tsc` CLI with `vue-tsc` for type checking. In editors, we need [Volar](https://marketplace.visualstudio.com/items?itemName=Vue.volar) to make the TypeScript language service aware of `.vue` types.
+TypeScript по умолчанию не понимает типы `.vue` файлов, поэтому для проверки типов используем `vue-tsc`.  
+В редакторах нужно [Volar](https://marketplace.visualstudio.com/items?itemName=Vue.volar), чтобы TypeScript понимал `.vue` файлы.
 
-## Customize configuration
+## Настройка конфигурации
 
-See [Vite Configuration Reference](https://vite.dev/config/).
+См. [документацию Vite](https://vite.dev/config/).
 
-## Project Setup
+## Установка проекта
 
 ```sh
 npm install
 ```
 
-### Compile and Hot-Reload for Development
+### Запуск проекта в режиме разработки с горячей перезагрузкой
 
 ```sh
 npm run dev
 ```
 
-### Type-Check, Compile and Minify for Production
+### Проверка типов, сборка и минификация для продакшна
 
 ```sh
 npm run build
+```
+
+## Переменные окружения
+
+Создайте файл .env в корне проекта и добавьте ваш токен с [OpenRouter](https://openrouter.ai/)
+
+```sh
+VITE_OPENROUTER_API_KEY=ваш_токен
 ```

@@ -66,7 +66,8 @@ onUpdated(() => {
 
 .app-container {
   width: 100%;
-  max-height: 450px;
+  height: 100%;
+  margin-bottom: 20px;
   padding-right: 10px;
   flex-direction: column;
   overflow-y: auto;
@@ -77,6 +78,10 @@ onUpdated(() => {
   font-size: 14px;
   line-height: 1.5;
   color: #fff;
+}
+
+.app-answer:last-child {
+  margin-bottom: 0;
 }
 
 .flex {

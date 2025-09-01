@@ -10,7 +10,11 @@
           ref="textarea"
           @keydown.enter.prevent="handleEnter"
         ></textarea>
-        <AppButton text="Отправить" @click="addMessage" />
+        <AppButton
+          text="Отправить"
+          @click="addMessage"
+          :disabled="isDisabled"
+        />
       </form>
     </div>
   </div>
@@ -20,13 +24,18 @@
 import AppButton from '@/components/AppButton.vue'
 import { useAnswersStore } from '@/stores/AnswersStore'
 import { sendMessageToAI } from '@/api/sendMessage'
-import { onMounted, nextTick, ref } from 'vue'
+import { onMounted, nextTick, ref, computed } from 'vue'
 
 const message = defineModel()
 const answersStore = useAnswersStore()
 const textarea = ref(null)
 
+const isLoading = ref(false)
+const isDisabled = computed(() => message.value === '' || isLoading.value)
+
 function addMessage() {
+  isLoading.value = true
+
   answersStore.answer.push({ role: 'user', message: message.value })
   localStorage.setItem('messageHistory', JSON.stringify(answersStore.answer))
 
@@ -37,6 +46,7 @@ function addMessage() {
   sendMessageToAI(message.value).then((replay) => {
     answersStore.answer[aiMessageIndex].replay = replay
     answersStore.answer[aiMessageIndex].loading = false
+    isLoading.value = false
     localStorage.setItem('messageHistory', JSON.stringify(answersStore.answer))
   })
 
@@ -83,5 +93,10 @@ onMounted(() => {
   color: #fff;
   margin-bottom: 10px;
   white-space: pre-wrap;
+}
+
+:disabled {
+  opacity: 0.5;
+  cursor: not-allowed;
 }
 </style>
