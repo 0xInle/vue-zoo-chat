@@ -33,7 +33,7 @@ const textarea = ref(null)
 const isLoading = ref(false)
 const isDisabled = computed(() => message.value === '' || isLoading.value)
 
-function addMessage() {
+function addMessage(localizedMessage) {
   isLoading.value = true
 
   answersStore.answer.push({ role: 'user', message: message.value })

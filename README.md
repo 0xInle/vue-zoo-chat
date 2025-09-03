@@ -9,7 +9,7 @@
 ## Поддержка типов для `.vue` в TypeScript
 
 TypeScript по умолчанию не понимает типы `.vue` файлов, поэтому для проверки типов используем `vue-tsc`.  
-В редакторах нужно [Volar](https://marketplace.visualstudio.com/items?itemName=Vue.volar), чтобы TypeScript понимал `.vue` файлы.
+В редакторах нужен [Volar](https://marketplace.visualstudio.com/items?itemName=Vue.volar), чтобы TypeScript понимал `.vue` файлы.
 
 ## Настройка конфигурации
 
@@ -35,8 +35,8 @@ npm run build
 
 ## Переменные окружения
 
-Создайте файл .env в корне проекта и добавьте ваш токен с [OpenRouter](https://openrouter.ai/)
+Создайте файл .env в корне проекта и добавьте ваш ключ с [OpenRouter](https://openrouter.ai/)
 
 ```sh
-VITE_OPENROUTER_API_KEY=ваш_токен
+VITE_OPENROUTER_API_KEY=ваш_ключ
 ```

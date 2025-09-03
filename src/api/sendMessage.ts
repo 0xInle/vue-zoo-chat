@@ -1,33 +1,70 @@
 const apiKey = import.meta.env.VITE_OPENROUTER_API_KEY
 
 export async function sendMessageToAI(userMessage: string) {
-  const response = await fetch(
-    'https://openrouter.ai/api/v1/chat/completions',
-    {
-      method: 'POST',
-      headers: {
-        Authorization: `Bearer ${apiKey}`,
-        'Content-Type': 'application/json',
-      },
-      body: JSON.stringify({
-        model: 'deepseek/deepseek-chat-v3.1:free',
-        messages: [
-          {
-            role: 'user',
-            content: [
-              {
-                type: 'text',
-                text: userMessage,
-              },
-            ],
-          },
-        ],
-      }),
+  try {
+    const response = await fetch(
+      'https://openrouter.ai/api/v1/chat/completions',
+      {
+        method: 'POST',
+        headers: {
+          Authorization: `Bearer ${apiKey}`,
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify({
+          model: 'deepseek/deepseek-chat-v3.1:free',
+          messages: [
+            {
+              role: 'user',
+              content: [
+                {
+                  type: 'text',
+                  text: userMessage,
+                },
+              ],
+            },
+          ],
+        }),
+      }
+    )
+
+    const data = await response.json()
+
+    if (!response.ok) {
+      const code = data.error.code
+      const message = data.error.message
+
+      let localizedMessage = 'Произошла ошибка.'
+      switch (code) {
+        case 401:
+          localizedMessage = 'Пользователь не найден (неверный API-ключ).'
+          break
+        case 402:
+          localizedMessage = 'Недостаточно кредитов на аккаунте.'
+          break
+        case 403:
+          localizedMessage = 'Доступ запрещён.'
+          break
+        case 429:
+          localizedMessage = 'Слишком много запросов. Попробуйте позже.'
+          break
+        case 500:
+        case 502:
+        case 503:
+          localizedMessage =
+            'Сервер временно недоступен. Повторите попытку позже.'
+          break
+        default:
+          localizedMessage = `Ошибка ${code}: ${message}.`
+      }
+
+      return localizedMessage
     }
-  )
 
-  const data = await response.json()
-  const message = data.choices[0]?.message?.content
+    const message = data.choices[0]?.message?.content
 
-  return message
+    return message
+  } catch (error) {
+    console.error(error)
+    return null
+  }
 }
