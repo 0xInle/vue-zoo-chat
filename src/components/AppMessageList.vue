@@ -19,8 +19,8 @@
   </div>
 </template>
 
-<script setup>
-import { ref, onMounted, watch, nextTick } from 'vue'
+<script setup lang="ts">
+import { ref, onMounted, watch, nextTick, type Ref } from 'vue'
 import { useAnswersStore } from '@/stores/AnswersStore'
 import { storeToRefs } from 'pinia'
 import { marked } from 'marked'
@@ -29,7 +29,7 @@ import Loader from './ui/Loader.vue'
 const answersStore = useAnswersStore()
 const { answer } = storeToRefs(answersStore)
 
-const appContainer = ref(null)
+const appContainer: Ref<HTMLDivElement | null> = ref(null)
 
 const scrollToBottom = () => {
   nextTick(() => {

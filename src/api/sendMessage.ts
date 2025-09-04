@@ -1,6 +1,34 @@
 const apiKey = import.meta.env.VITE_OPENROUTER_API_KEY
 
-export async function sendMessageToAI(userMessage: string) {
+export interface ApiMessage {
+  role: 'user' | 'assistant'
+  content: string | null
+}
+
+export interface ApiChoice {
+  finish_reason: string | null
+  native_finish_reason: string | null
+  message: ApiMessage
+}
+
+export interface ApiError {
+  code: number
+  message: string
+  metadata?: Record<string, unknown>
+}
+
+export interface ApiResponse {
+  id: string
+  choices: ApiChoice[]
+  created: number
+  model: string
+  object: 'chat.completion'
+  error?: ApiError
+}
+
+export async function sendMessageToAI(
+  userMessage: string
+): Promise<string | null> {
   try {
     const response = await fetch(
       'https://openrouter.ai/api/v1/chat/completions',
@@ -27,9 +55,9 @@ export async function sendMessageToAI(userMessage: string) {
       }
     )
 
-    const data = await response.json()
+    const data: ApiResponse = await response.json()
 
-    if (!response.ok) {
+    if (!response.ok && data.error) {
       const code = data.error.code
       const message = data.error.message
 

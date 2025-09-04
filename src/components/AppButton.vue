@@ -2,15 +2,13 @@
   <button class="btn btn-reset">{{ text }}</button>
 </template>
 
-<script setup>
+<script setup lang="ts">
 import { defineProps } from 'vue'
 
-const props = defineProps({
-  text: {
-    type: String,
-    required: true,
-  },
-})
+interface Props {
+  text: string
+}
+const props = defineProps<Props>()
 </script>
 
 <style scoped>

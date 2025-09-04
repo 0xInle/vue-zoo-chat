@@ -6,10 +6,10 @@
   </div>
 </template>
 
-<script setup>
+<script setup lang="ts">
 import AppMessageForm from '@/components/AppMessageForm.vue'
-import AppMessageList from './components/AppMessageList.vue'
-import AppWelcomeContent from './components/AppWelcomeContent.vue'
+import AppMessageList from '@/components/AppMessageList.vue'
+import AppWelcomeContent from '@/components/AppWelcomeContent.vue'
 import { useAnswersStore } from '@/stores/AnswersStore'
 import { computed } from 'vue'
 

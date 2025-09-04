@@ -20,20 +20,20 @@
   </div>
 </template>
 
-<script setup>
+<script setup lang="ts">
 import AppButton from '@/components/AppButton.vue'
 import { useAnswersStore } from '@/stores/AnswersStore'
 import { sendMessageToAI } from '@/api/sendMessage'
-import { onMounted, nextTick, ref, computed } from 'vue'
+import { onMounted, nextTick, ref, computed, type Ref } from 'vue'
 
-const message = defineModel()
+const message: Ref<string> = ref('')
 const answersStore = useAnswersStore()
-const textarea = ref(null)
+const textarea: Ref<HTMLTextAreaElement | null> = ref(null)
 
 const isLoading = ref(false)
 const isDisabled = computed(() => message.value === '' || isLoading.value)
 
-function addMessage(localizedMessage) {
+function addMessage(localizedMessage?: string): void {
   isLoading.value = true
 
   answersStore.answer.push({ role: 'user', message: message.value })
@@ -53,11 +53,14 @@ function addMessage(localizedMessage) {
   message.value = ''
 }
 
-function handleEnter(event) {
+function handleEnter(event: KeyboardEvent): void {
   if (event.shiftKey) {
     message.value += '\n'
     nextTick(() => {
-      textarea.value.scrollTop = textarea.value.scrollHeight
+      const el = textarea.value
+      if (el) {
+        el.scrollTop = el.scrollHeight
+      }
     })
   } else {
     addMessage()
