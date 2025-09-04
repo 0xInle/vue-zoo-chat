@@ -34,7 +34,8 @@ const appContainer: Ref<HTMLDivElement | null> = ref(null)
 const scrollToBottom = () => {
   nextTick(() => {
     const container = appContainer.value
-    if (container) container.scrollTop = container.scrollHeight
+    if (container)
+      container.scrollTo({ top: container.scrollHeight, behavior: 'smooth' })
   })
 }
 
