@@ -81,8 +81,8 @@ onMounted(() => {
 .form-wrapper {
   margin: 0 auto;
   background-color: #404045;
-  border: 1px solid #404045;
-  border-radius: 20px;
+  box-shadow: 0 0 10px rgba(0, 0, 0, 0.3);
+  border-radius: 10px;
   padding: 10px 20px;
   width: 100%;
   max-width: 800px;

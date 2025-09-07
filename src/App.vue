@@ -1,9 +1,9 @@
 <template>
-  <div :class="appClasses">
+  <main :class="mainClasses">
     <AppMessageList v-if="answersStore.answer.length > 0" />
     <AppWelcomeContent v-else />
     <AppMessageForm />
-  </div>
+  </main>
 </template>
 
 <script setup lang="ts">
@@ -14,14 +14,14 @@ import { useAnswersStore } from '@/stores/AnswersStore'
 import { computed } from 'vue'
 
 const answersStore = useAnswersStore()
-const appClasses = computed(() => [
-  'app',
-  answersStore.answer.length > 0 ? 'app-has-messages' : '',
+const mainClasses = computed(() => [
+  'main',
+  answersStore.answer.length > 0 ? 'main-has-messages' : '',
 ])
 </script>
 
 <style scoped>
-.app {
+.main {
   display: flex;
   flex-direction: column;
   justify-content: center;
@@ -31,7 +31,7 @@ const appClasses = computed(() => [
   margin: 0 auto;
 }
 
-.app-has-messages {
+.main-has-messages {
   justify-content: space-between;
   padding: 30px 0;
 }

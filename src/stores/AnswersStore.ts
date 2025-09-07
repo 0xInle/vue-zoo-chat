@@ -1,7 +1,7 @@
 import { defineStore } from 'pinia'
 import { ref } from 'vue'
 
-interface Answer {
+type Answer = {
   role: 'user' | 'ai'
   message?: string
   replay?: string | null

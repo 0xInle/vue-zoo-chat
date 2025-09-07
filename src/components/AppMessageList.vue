@@ -56,10 +56,15 @@ watch(
 .app-container {
   width: 100%;
   height: 100%;
-  margin-bottom: 20px;
-  padding-right: 10px;
+  padding: 0 10px;
   flex-direction: column;
   overflow-y: auto;
+  scrollbar-width: none;
+  -ms-overflow-style: none;
+}
+
+.app-container::-webkit-scrollbar {
+  display: none;
 }
 
 .app-answer {
@@ -77,9 +82,11 @@ watch(
   width: 50%;
   margin-left: auto;
   max-width: 50%;
-  padding: 10px 20px;
+  padding: 10px;
   max-width: fit-content;
   background-color: #404045;
-  border-radius: 20px;
+  box-shadow: 0 0 10px rgba(0, 0, 0, 0.3);
+
+  border-radius: 10px;
 }
 </style>

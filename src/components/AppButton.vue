@@ -5,10 +5,7 @@
 <script setup lang="ts">
 import { defineProps } from 'vue'
 
-interface Props {
-  text: string
-}
-const props = defineProps<Props>()
+const { text } = defineProps<{ text: string }>()
 </script>
 
 <style scoped>

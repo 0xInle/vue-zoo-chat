@@ -1,23 +1,23 @@
 const apiKey = import.meta.env.VITE_OPENROUTER_API_KEY
 
-export interface ApiMessage {
+export type ApiMessage = {
   role: 'user' | 'assistant'
   content: string | null
 }
 
-export interface ApiChoice {
+export type ApiChoice = {
   finish_reason: string | null
   native_finish_reason: string | null
   message: ApiMessage
 }
 
-export interface ApiError {
+export type ApiError = {
   code: number
   message: string
   metadata?: Record<string, unknown>
 }
 
-export interface ApiResponse {
+export type ApiResponse = {
   id: string
   choices: ApiChoice[]
   created: number
