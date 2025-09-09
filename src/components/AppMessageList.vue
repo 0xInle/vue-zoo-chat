@@ -1,14 +1,15 @@
 <template>
   <div class="app-container" ref="appContainer">
-    <div
-      class="app-answer"
-      v-for="(message, idx) in answersStore.answer"
-      :key="idx"
-    >
+    <div v-for="message in currentChat" class="app-answer">
       <div class="user-message" v-if="message.message">
         {{ message.message }}
       </div>
-      <div class="ai-message">
+      <div
+        class="ai-message"
+        v-if="
+          message.loading || (message.replay && message.replay.trim() !== '')
+        "
+      >
         <div
           v-if="!message.loading"
           v-html="message.replay ? marked(message.replay) : ''"
@@ -20,7 +21,7 @@
 </template>
 
 <script setup lang="ts">
-import { ref, onMounted, watch, nextTick, type Ref } from 'vue'
+import { ref, onMounted, watch, nextTick, type Ref, computed } from 'vue'
 import { useAnswersStore } from '@/stores/AnswersStore'
 import { storeToRefs } from 'pinia'
 import { marked } from 'marked'
@@ -28,6 +29,12 @@ import Loader from './ui/Loader.vue'
 
 const answersStore = useAnswersStore()
 const { answer } = storeToRefs(answersStore)
+
+const currentChat = computed(() => {
+  const idx = answersStore.currentChatIndex
+  if (idx === null || answersStore.answer[idx] === undefined) return []
+  return answersStore.answer[idx]
+})
 
 const appContainer: Ref<HTMLDivElement | null> = ref(null)
 
@@ -85,8 +92,6 @@ watch(
   padding: 10px;
   max-width: fit-content;
   background-color: #404045;
-  box-shadow: 0 0 10px rgba(0, 0, 0, 0.3);
-
   border-radius: 10px;
 }
 </style>

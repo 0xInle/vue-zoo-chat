@@ -24,7 +24,7 @@
 import AppButton from '@/components/AppButton.vue'
 import { useAnswersStore } from '@/stores/AnswersStore'
 import { sendMessageToAI } from '@/api/sendMessage'
-import { onMounted, nextTick, ref, computed, type Ref } from 'vue'
+import { onMounted, nextTick, ref, computed, type Ref, watch } from 'vue'
 
 const message: Ref<string> = ref('')
 const answersStore = useAnswersStore()
@@ -33,19 +33,37 @@ const textarea: Ref<HTMLTextAreaElement | null> = ref(null)
 const isLoading = ref(false)
 const isDisabled = computed(() => message.value === '' || isLoading.value)
 
-function addMessage(localizedMessage?: string): void {
+function addMessage(): void {
+  if (answersStore.currentChatIndex === null) {
+    answersStore.addChat()
+    answersStore.currentChatIndex = answersStore.answer.length - 1
+  }
+
+  const idx = answersStore.currentChatIndex
+  if (idx === null) return
+
+  let currentChat = answersStore.answer[idx]
+
+  if (!Array.isArray(currentChat)) {
+    answersStore.addChat()
+    answersStore.currentChatIndex = answersStore.answer.length - 1
+    currentChat = answersStore.answer[answersStore.currentChatIndex]
+  }
+
+  if (!currentChat) return
+
   isLoading.value = true
 
-  answersStore.answer.push({ role: 'user', message: message.value })
+  currentChat.push({ role: 'user', message: message.value })
   localStorage.setItem('messageHistory', JSON.stringify(answersStore.answer))
 
-  const aiMessageIndex = answersStore.answer.length
-  answersStore.answer.push({ role: 'ai', replay: '', loading: true })
+  const aiMessageIndex = currentChat.length
+  currentChat.push({ role: 'ai', replay: '', loading: true })
   localStorage.setItem('messageHistory', JSON.stringify(answersStore.answer))
 
   sendMessageToAI(message.value).then((replay) => {
-    answersStore.answer[aiMessageIndex].replay = replay
-    answersStore.answer[aiMessageIndex].loading = false
+    currentChat[aiMessageIndex].replay = replay
+    currentChat[aiMessageIndex].loading = false
     isLoading.value = false
     localStorage.setItem('messageHistory', JSON.stringify(answersStore.answer))
   })
@@ -68,9 +86,35 @@ function handleEnter(event: KeyboardEvent): void {
 }
 
 onMounted(() => {
+  textarea.value?.focus()
+  // const localHistory = localStorage.removeItem('messageHistory')
   const localHistory = localStorage.getItem('messageHistory')
-  if (localHistory) answersStore.answer = JSON.parse(localHistory)
+  if (localHistory) {
+    answersStore.answer = JSON.parse(localHistory)
+  }
+
+  const savedIndex = localStorage.getItem('currentChatIndex')
+  if (savedIndex !== null) {
+    const idx = Number(savedIndex)
+    if (!isNaN(idx) && idx >= 0 && idx < answersStore.answer.length) {
+      answersStore.currentChatIndex = idx
+    }
+  } else if (answersStore.answer.length > 0) {
+    answersStore.currentChatIndex = answersStore.answer.length - 1
+  }
 })
+
+watch(
+  () => answersStore.focusTextarea,
+  (val) => {
+    if (val) {
+      nextTick(() => {
+        textarea.value?.focus()
+        answersStore.focusTextarea = false
+      })
+    }
+  }
+)
 </script>
 
 <style scoped>

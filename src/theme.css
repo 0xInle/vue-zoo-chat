@@ -61,3 +61,7 @@ html {
 .hidden-img {
   display: none;
 }
+
+.app {
+  display: flex;
+}
