@@ -93,15 +93,7 @@ onMounted(() => {
     answersStore.answer = JSON.parse(localHistory)
   }
 
-  const savedIndex = localStorage.getItem('currentChatIndex')
-  if (savedIndex !== null) {
-    const idx = Number(savedIndex)
-    if (!isNaN(idx) && idx >= 0 && idx < answersStore.answer.length) {
-      answersStore.currentChatIndex = idx
-    }
-  } else if (answersStore.answer.length > 0) {
-    answersStore.currentChatIndex = answersStore.answer.length - 1
-  }
+  answersStore.currentChatIndex = 0
 })
 
 watch(

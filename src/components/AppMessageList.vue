@@ -15,6 +15,7 @@
           v-html="message.replay ? marked(message.replay) : ''"
         ></div>
         <Loader v-else />
+        <AppToolbar v-if="!message.loading" :text="message.replay ?? ''" />
       </div>
     </div>
   </div>
@@ -26,6 +27,7 @@ import { useAnswersStore } from '@/stores/AnswersStore'
 import { storeToRefs } from 'pinia'
 import { marked } from 'marked'
 import Loader from './ui/Loader.vue'
+import AppToolbar from './AppToolbar.vue'
 
 const answersStore = useAnswersStore()
 const { answer } = storeToRefs(answersStore)
@@ -93,5 +95,9 @@ watch(
   max-width: fit-content;
   background-color: #404045;
   border-radius: 10px;
+}
+
+.ai-message {
+  margin-bottom: 20px;
 }
 </style>
