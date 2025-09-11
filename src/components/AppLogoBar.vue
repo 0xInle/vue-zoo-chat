@@ -4,19 +4,27 @@
       <img src="../../public/logo.png" alt="Logo" />
     </div>
     <div class="logo-btn-bar">
-      <button class="logo-btn btn-reset">
-        <IconSidebar class="logo-icon" @click="$emit('show-aside')" />
+      <button
+        class="logo-btn btn-reset"
+        @click="$emit('show-aside')"
+        @keydown.enter.prevent="$emit('show-aside')"
+      >
+        <IconSidebar class="logo-icon" />
       </button>
-      <button class="logo-btn btn-reset">
-        <IconNewChat class="logo-icon" @click="addChat" />
+      <button
+        class="logo-btn btn-reset"
+        @click="addChat"
+        @keydown.enter.prevent="addChat"
+      >
+        <IconNewChat class="logo-icon" />
       </button>
     </div>
   </header>
 </template>
 
 <script setup lang="ts">
-import IconSidebar from '../../public/icon-sidebar.svg'
-import IconNewChat from '../../public/icon-new-chat.svg'
+import IconSidebar from '@/assets/icons/icon-sidebar.svg'
+import IconNewChat from '@/assets/icons/icon-new-chat.svg'
 import { useAnswersStore } from '@/stores/AnswersStore'
 
 const answersStore = useAnswersStore()
@@ -52,6 +60,7 @@ function addChat() {
   align-items: center;
   padding: 10px;
   background-color: #71717a;
+  box-shadow: 0 0 10px rgba(0, 0, 0, 0.3);
   border-radius: 10px;
 }
 

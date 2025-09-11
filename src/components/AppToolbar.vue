@@ -1,19 +1,23 @@
 <template>
   <div class="app-toolbar">
-    <button class="app-icon-btn btn-reset" @click="copyToClipboard(text)">
+    <button
+      class="app-icon-btn btn-reset"
+      @click="copyToClipboard(text)"
+      tabindex="-1"
+    >
       <IconCopy class="app-icon-copy" v-if="!copied" />
     </button>
-    <IconCheck v-if="copied" />
-    <button class="app-icon-btn btn-reset">
+    <IconCheck v-if="copied" style="margin-left: -10px; margin-right: 8px" />
+    <button class="app-icon-btn btn-reset" tabindex="-1">
       <IconRegenerate @click="regenerateReplay(text)" />
     </button>
   </div>
 </template>
 
 <script setup lang="ts">
-import IconCopy from '../../public/icon-copy.svg'
-import IconCheck from '../../public/icon-check.svg'
-import IconRegenerate from '../../public/icon-regenerate.svg'
+import IconCopy from '@/assets/icons/icon-copy.svg'
+import IconCheck from '@/assets/icons/icon-check.svg'
+import IconRegenerate from '@/assets/icons/icon-regenerate.svg'
 import { ref, defineProps } from 'vue'
 
 const props = defineProps<{ text: string }>()

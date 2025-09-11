@@ -1,5 +1,5 @@
 <template>
-  <div class="app-container" ref="appContainer">
+  <div class="app-container" ref="appContainer" tabindex="-1">
     <div v-for="message in currentChat" class="app-answer">
       <div class="user-message" v-if="message.message">
         {{ message.message }}
@@ -63,6 +63,7 @@ watch(
 
 <style scoped>
 .app-container {
+  outline: none;
   width: 100%;
   height: 100%;
   padding: 0 10px;

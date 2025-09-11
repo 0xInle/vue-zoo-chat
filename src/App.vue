@@ -6,14 +6,16 @@
     <AppWelcomeContent v-else />
     <AppMessageForm />
   </main>
+  <AppProfileBar />
 </template>
 
 <script setup lang="ts">
-import AppLogoBar from './components/AppLogoBar.vue'
-import AppAside from './components/AppAside.vue'
-import AppMessageForm from '@/components/AppMessageForm.vue'
+import AppLogoBar from '@/components/AppLogoBar.vue'
+import AppAside from '@/components/AppAside.vue'
 import AppMessageList from '@/components/AppMessageList.vue'
 import AppWelcomeContent from '@/components/AppWelcomeContent.vue'
+import AppMessageForm from '@/components/AppMessageForm.vue'
+import AppProfileBar from '@/components/AppProfileBar.vue'
 import { useAnswersStore } from '@/stores/AnswersStore'
 import { computed, ref } from 'vue'
 

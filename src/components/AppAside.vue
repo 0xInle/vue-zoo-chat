@@ -22,13 +22,20 @@
         </button>
       </li>
     </ul>
-    <AppButton text="Открыть профиль" class="aside-btn" />
+    <!-- <AppButton text="Открыть профиль" class="aside-btn" /> -->
   </aside>
 </template>
 
 <script setup lang="ts">
 import AppButton from './AppButton.vue'
-import { ref, watch, defineProps, defineEmits } from 'vue'
+import {
+  ref,
+  watch,
+  defineProps,
+  defineEmits,
+  onMounted,
+  onBeforeUnmount,
+} from 'vue'
 import { useAnswersStore } from '@/stores/AnswersStore'
 
 const answersStore = useAnswersStore()
@@ -60,6 +67,20 @@ watch(
     }
   }
 )
+
+function handleEscape(event: KeyboardEvent) {
+  if (event.key === 'Escape' && props.isVisible) {
+    emit('update:isVisible', false)
+  }
+}
+
+onMounted(() => {
+  document.addEventListener('keydown', handleEscape)
+})
+
+onBeforeUnmount(() => {
+  document.removeEventListener('keydown', handleEscape)
+})
 </script>
 
 <style scoped>
