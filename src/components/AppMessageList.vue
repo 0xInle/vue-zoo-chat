@@ -7,7 +7,8 @@
       <div
         class="ai-message"
         v-if="
-          message.loading || (message.replay && message.replay.trim() !== '')
+          message.loading ||
+          (typeof message.replay === 'string' && message.replay.trim() !== '')
         "
       >
         <div
@@ -15,7 +16,13 @@
           v-html="message.replay ? marked(message.replay) : ''"
         ></div>
         <Loader v-else />
-        <AppToolbar v-if="!message.loading" :text="message.replay ?? ''" />
+        <AppToolbar
+          v-if="!message.loading && typeof message.replay === 'string'"
+          :text="message.replay"
+        />
+      </div>
+      <div class="error-message" v-if="message.error">
+        {{ message.error.text }}
       </div>
     </div>
   </div>
@@ -100,5 +107,13 @@ watch(
 
 .ai-message {
   margin-bottom: 20px;
+}
+
+.error-message {
+  padding: 10px;
+  border: 1px solid rgb(240, 85, 85);
+  border-radius: 10px;
+  color: rgb(240, 85, 85);
+  box-shadow: 0 0 10px rgba(240, 85, 85, 0.3);
 }
 </style>

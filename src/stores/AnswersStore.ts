@@ -1,10 +1,12 @@
 import { defineStore } from 'pinia'
 import { ref, type Ref } from 'vue'
+import type { LocalizedError } from '@/api/sendMessage'
 
 export type Answer = {
   role: 'user' | 'ai'
   message?: string
   replay?: string | null
+  error?: LocalizedError | null
   loading?: boolean
 }
 

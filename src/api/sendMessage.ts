@@ -26,9 +26,14 @@ export type ApiResponse = {
   error?: ApiError
 }
 
+export type LocalizedError = {
+  text: string
+  type: 'error'
+}
+
 export async function sendMessageToAI(
   userMessage: string
-): Promise<string | null> {
+): Promise<string | LocalizedError | null> {
   try {
     const response = await fetch(
       'https://openrouter.ai/api/v1/chat/completions',
@@ -85,7 +90,10 @@ export async function sendMessageToAI(
           localizedMessage = `Ошибка ${code}: ${message}.`
       }
 
-      return localizedMessage
+      return {
+        text: localizedMessage,
+        type: 'error',
+      }
     }
 
     const message = data.choices[0]?.message?.content

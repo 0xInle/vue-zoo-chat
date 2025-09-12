@@ -60,8 +60,18 @@ function addMessage(): void {
   currentChat.push({ role: 'ai', replay: '', loading: true })
   localStorage.setItem('messageHistory', JSON.stringify(answersStore.answer))
 
-  sendMessageToAI(message.value).then((replay) => {
-    currentChat[aiMessageIndex].replay = replay
+  sendMessageToAI(message.value).then((result) => {
+    if (typeof result === 'string') {
+      currentChat[aiMessageIndex].replay = result
+    } else if (result && result.type === 'error') {
+      currentChat[aiMessageIndex].error = result
+    } else {
+      currentChat[aiMessageIndex].error = {
+        text: 'Неизвестная ошибка',
+        type: 'error',
+      }
+    }
+
     currentChat[aiMessageIndex].loading = false
     isLoading.value = false
     localStorage.setItem('messageHistory', JSON.stringify(answersStore.answer))
