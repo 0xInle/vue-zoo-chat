@@ -7,22 +7,17 @@
   >
     <AppButton text="Новый чат" class="aside-btn" @click="addChat" />
     <ul class="aside-chat-list list-reset" ref="chatContainer">
-      <li
-        v-for="(chat, idx) in answersStore.answer"
-        :key="idx"
-        class="aside-chat-title"
-      >
+      <li v-for="chatId in chatIds" :key="chatId" class="aside-chat-title">
         <button
           class="aside-chat-btn btn-reset"
-          @click="answersStore.currentChatIndex = idx"
+          @click="answersStore.currentChatId = chatId"
         >
           <div class="aside-btn-text">
-            {{ chat[0]?.message || 'Новый чат' }}
+            {{ answersStore.answer[chatId][0]?.message || 'Новый чат' }}
           </div>
         </button>
       </li>
     </ul>
-    <!-- <AppButton text="Открыть профиль" class="aside-btn" /> -->
   </aside>
 </template>
 
@@ -35,10 +30,12 @@ import {
   defineEmits,
   onMounted,
   onBeforeUnmount,
+  computed,
 } from 'vue'
 import { useAnswersStore } from '@/stores/AnswersStore'
 
 const answersStore = useAnswersStore()
+const chatIds = computed(() => Object.keys(answersStore.answer).reverse())
 
 function addChat() {
   answersStore.addChat()

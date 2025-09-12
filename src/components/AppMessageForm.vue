@@ -34,20 +34,19 @@ const isLoading = ref(false)
 const isDisabled = computed(() => message.value === '' || isLoading.value)
 
 function addMessage(): void {
-  if (answersStore.currentChatIndex === null) {
+  if (!answersStore.currentChatId) {
     answersStore.addChat()
-    answersStore.currentChatIndex = answersStore.answer.length - 1
   }
 
-  const idx = answersStore.currentChatIndex
-  if (idx === null) return
+  const id = answersStore.currentChatId
+  if (!id) return
 
-  let currentChat = answersStore.answer[idx]
-
-  if (!Array.isArray(currentChat)) {
+  let currentChat = answersStore.answer[id]
+  if (!currentChat) {
     answersStore.addChat()
-    answersStore.currentChatIndex = answersStore.answer.length - 1
-    currentChat = answersStore.answer[answersStore.currentChatIndex]
+    const keys = Object.keys(answersStore.answer)
+    answersStore.currentChatId = keys[keys.length - 1] ?? null
+    currentChat = answersStore.answer[answersStore.currentChatId!]
   }
 
   if (!currentChat) return
@@ -91,9 +90,17 @@ onMounted(() => {
   const localHistory = localStorage.getItem('messageHistory')
   if (localHistory) {
     answersStore.answer = JSON.parse(localHistory)
+
+    const keys = Object.keys(answersStore.answer)
+    const lastNumber =
+      keys
+        .map((k) => parseInt(k.replace('Chat', ''), 10))
+        .filter((n) => !isNaN(n))
+        .sort((a, b) => b - a)[0] || 0
+    answersStore.chatCounter = lastNumber
   }
 
-  answersStore.currentChatIndex = 0
+  answersStore.currentChatId = null
 })
 
 watch(

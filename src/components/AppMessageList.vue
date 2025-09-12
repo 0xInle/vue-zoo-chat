@@ -33,7 +33,7 @@ const answersStore = useAnswersStore()
 const { answer } = storeToRefs(answersStore)
 
 const currentChat = computed(() => {
-  const idx = answersStore.currentChatIndex
+  const idx = answersStore.currentChatId
   if (idx === null || answersStore.answer[idx] === undefined) return []
   return answersStore.answer[idx]
 })

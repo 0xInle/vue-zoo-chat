@@ -1,8 +1,8 @@
 <template>
   <AppLogoBar @showAside="showAside" v-if="!isVisible" />
   <AppAside v-model:isVisible="isVisible" />
-  <main :class="mainClasses">
-    <AppMessageList v-if="answersStore.answer.length > 0" />
+  <main class="main">
+    <AppMessageList v-if="answersStore.currentChatId" />
     <AppWelcomeContent v-else />
     <AppMessageForm />
   </main>
@@ -17,7 +17,7 @@ import AppWelcomeContent from '@/components/AppWelcomeContent.vue'
 import AppMessageForm from '@/components/AppMessageForm.vue'
 import AppProfileBar from '@/components/AppProfileBar.vue'
 import { useAnswersStore } from '@/stores/AnswersStore'
-import { computed, ref } from 'vue'
+import { ref } from 'vue'
 
 const answersStore = useAnswersStore()
 const isVisible = ref(false)
@@ -25,11 +25,6 @@ const isVisible = ref(false)
 function showAside() {
   isVisible.value = !isVisible.value
 }
-
-const mainClasses = computed(() => [
-  'main',
-  answersStore.answer.length > 0 ? 'main-has-messages' : '',
-])
 </script>
 
 <style scoped>
@@ -42,10 +37,6 @@ const mainClasses = computed(() => [
   width: 100%;
   max-width: 800px;
   margin: 0 auto;
-}
-
-.main-has-messages {
-  justify-content: space-between;
   padding: 20px 0;
 }
 

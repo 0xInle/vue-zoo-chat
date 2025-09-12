@@ -36,17 +36,16 @@
   </div>
 </template>
 
-<script setup>
+<script setup lang="ts">
 import IconSun from '@/assets/icons/icon-sun.svg'
 import IconMoon from '@/assets/icons/icon-moon.svg'
 import IconDot from '@/assets/icons/icon-dot.svg'
 import AppButton from '@/components/AppButton.vue'
 import { ref, onMounted, onBeforeUnmount, nextTick } from 'vue'
-
 import { onClickOutside } from '@vueuse/core'
 
 const isOpen = ref(false)
-const target = ref(null)
+const target = ref<HTMLElement | null>(null)
 
 function toggleDropdown() {
   isOpen.value = !isOpen.value
@@ -62,7 +61,7 @@ onClickOutside(target, () => {
   isOpen.value = false
 })
 
-function handleEscape(event) {
+function handleEscape(event: KeyboardEvent) {
   if (event.key === 'Escape' && isOpen.value) {
     isOpen.value = false
   }

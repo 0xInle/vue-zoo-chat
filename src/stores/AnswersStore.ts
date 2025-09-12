@@ -9,24 +9,31 @@ export type Answer = {
 }
 
 export const useAnswersStore = defineStore('answersStore', () => {
-  const answer = ref<Answer[][]>([])
-  const currentChatIndex: Ref<number | null> = ref(null)
+  const answer = ref<Record<string, Answer[]>>({})
+  const currentChatId: Ref<string | null> = ref(null)
   const focusTextarea: Ref<boolean> = ref(false)
+  const chatCounter = ref(0)
 
   function addChat() {
-    answer.value.unshift([])
-    currentChatIndex.value = 0
+    chatCounter.value++
+    const id = `Chat${chatCounter.value}`
+    answer.value[id] = []
+    currentChatId.value = id
     focusTextarea.value = true
+    return id
   }
 
   function getLastChat() {
-    return answer.value.at(-1)
+    const keys = Object.keys(answer.value)
+    return keys.length ? answer.value[keys[keys.length - 1]] : null
   }
+
   return {
     answer,
     addChat,
     getLastChat,
-    currentChatIndex,
+    currentChatId,
     focusTextarea,
+    chatCounter,
   }
 })
