@@ -1,46 +1,74 @@
 <template>
-  <AppLogoBar @showAside="showAside" v-if="!isVisible" />
-  <AppAside v-model:isVisible="isVisible" />
-  <main class="main">
-    <AppMessageList v-if="answersStore.currentChatId" />
-    <AppWelcomeContent v-else />
-    <AppMessageForm />
-  </main>
-  <AppProfileBar />
+  <RouterView />
 </template>
 
 <script setup lang="ts">
-import AppLogoBar from '@/components/AppLogoBar.vue'
-import AppAside from '@/components/AppAside.vue'
-import AppMessageList from '@/components/AppMessageList.vue'
-import AppWelcomeContent from '@/components/AppWelcomeContent.vue'
-import AppMessageForm from '@/components/AppMessageForm.vue'
-import AppProfileBar from '@/components/AppProfileBar.vue'
-import { useAnswersStore } from '@/stores/AnswersStore'
-import { ref } from 'vue'
+import { ref, provide } from 'vue'
+import router from './router'
+import {
+  GoogleAuthProvider,
+  signInWithPopup,
+  onAuthStateChanged,
+} from 'firebase/auth'
+import { auth } from './firebaseConfig'
 
-const answersStore = useAnswersStore()
-const isVisible = ref(false)
+const userName = ref<string | null>(localStorage.getItem('userName'))
+const userAvatar = ref<string | null>(localStorage.getItem('userAvatar'))
 
-function showAside() {
-  isVisible.value = !isVisible.value
+onAuthStateChanged(auth, (user) => {
+  if (user) {
+    userName.value = user.displayName
+    userAvatar.value = user.photoURL
+    localStorage.setItem('userName', user.displayName || '')
+    localStorage.setItem('userAvatar', user.photoURL || '')
+    if (router.currentRoute.value.path === '/login') {
+      router.push('/chat')
+    }
+  } else {
+    userName.value = null
+    userAvatar.value = null
+    localStorage.removeItem('userName')
+    localStorage.removeItem('userAvatar')
+    if (router.currentRoute.value.path !== '/login') {
+      router.push('/login')
+    }
+  }
+})
+
+async function signInWithGoogle() {
+  if (auth.currentUser) {
+    userName.value = auth.currentUser.displayName
+    userAvatar.value = auth.currentUser.photoURL
+    router.push('/chat')
+    return
+  }
+
+  const provider = new GoogleAuthProvider()
+  try {
+    const result = await signInWithPopup(auth, provider)
+    const user = result.user
+
+    userName.value = user.displayName
+    userAvatar.value = user.photoURL
+    localStorage.setItem('userName', user.displayName || '')
+    localStorage.setItem('userAvatar', user.photoURL || '')
+    router.push('/chat')
+  } catch (error) {
+    console.error(error)
+  }
 }
+
+function logout() {
+  auth.signOut()
+  userName.value = null
+  userAvatar.value = null
+  router.push('/login')
+}
+
+provide('login', signInWithGoogle)
+provide('logout', logout)
+provide('userName', userName)
+provide('userAvatar', userAvatar)
 </script>
 
-<style scoped>
-.main {
-  display: flex;
-  flex-direction: column;
-  justify-content: center;
-  align-items: center;
-  height: 100vh;
-  width: 100%;
-  max-width: 800px;
-  margin: 0 auto;
-  padding: 20px 0;
-}
-
-.flex {
-  width: 100%;
-}
-</style>
+<style></style>

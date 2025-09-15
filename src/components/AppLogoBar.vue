@@ -1,7 +1,7 @@
 <template>
   <header class="logo">
     <div class="logo-title">
-      <img src="../../public/logo.png" alt="Logo" />
+      <img src="../../public/logo.png" alt="Логотип" />
     </div>
     <div class="logo-btn-bar">
       <button
@@ -37,6 +37,7 @@ function addChat() {
 <style scoped>
 .logo {
   position: absolute;
+  left: 0;
   top: 0;
   display: flex;
   align-items: center;

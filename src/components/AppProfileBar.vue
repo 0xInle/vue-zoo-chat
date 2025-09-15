@@ -1,34 +1,48 @@
 <template>
   <div class="profile-container">
-    <div class="profile-controls flex">
-      <div class="profile-avatar">СБ</div>
+    <div class="profile-user">
+      <div class="profile-avatar" v-if="userAvatar">
+        <img :src="userAvatar" alt="Avatar" referrerpolicy="no-referrer" />
+      </div>
+      <div class="profile-name flex">
+        {{ userName }}
+      </div>
       <Transition name="dropdown">
         <div class="profile-dropdown" v-if="isOpen" ref="target" tabindex="0">
           <ul class="profile-list list-reset">
             <li class="profile-item">
-              <AppButton class="profile-btn-action" text="Очистить историю" />
+              <button class="profile-btn-action btn-reset">
+                <IconDatabase class="profile-btn-icon" />
+                Очистить историю
+              </button>
             </li>
             <li class="profile-item">
-              <AppButton class="profile-btn-action" text="Контакты" />
+              <button class="profile-btn-action btn-reset">
+                <IconContact class="profile-btn-icon" />
+                Контакты
+              </button>
             </li>
             <li class="profile-item">
-              <AppButton
-                class="profile-btn-action profile-btn-action--red"
-                text="Выход"
-              />
+              <button
+                class="profile-btn-action profile-btn-action--red btn-reset"
+                @click="logoutUser"
+              >
+                <IconLogout class="profile-btn-icon" />
+                Выход
+              </button>
             </li>
           </ul>
         </div>
       </Transition>
-      <div
-        class="profile-name flex"
+    </div>
+    <div class="profile-controls flex">
+      <button
+        class="profile-btn profile-btn-dot btn-reset"
         @click="toggleDropdown"
-        tabindex="0"
         @keydown.enter.prevent="toggleDropdown"
       >
-        Сергей Бирюков
         <IconDot class="profile-icon profile-icon-dot" />
-      </div>
+      </button>
       <button class="profile-btn profile-btn-theme btn-reset">
         <IconSun class="profile-icon" />
       </button>
@@ -40,9 +54,23 @@
 import IconSun from '@/assets/icons/icon-sun.svg'
 import IconMoon from '@/assets/icons/icon-moon.svg'
 import IconDot from '@/assets/icons/icon-dot.svg'
-import AppButton from '@/components/AppButton.vue'
-import { ref, onMounted, onBeforeUnmount, nextTick } from 'vue'
+import IconContact from '@/assets/icons/icon-contact.svg'
+import IconDatabase from '@/assets/icons/icon-database.svg'
+import IconLogout from '@/assets/icons/icon-logout.svg'
+import {
+  ref,
+  onMounted,
+  onBeforeUnmount,
+  nextTick,
+  inject,
+  type Ref,
+} from 'vue'
 import { onClickOutside } from '@vueuse/core'
+
+const userName = inject('userName') as Ref<string | null>
+const userAvatar = inject('userAvatar') as Ref<string | null>
+
+const logoutUser = inject<() => void>('logout')
 
 const isOpen = ref(false)
 const target = ref<HTMLElement | null>(null)
@@ -79,8 +107,6 @@ onBeforeUnmount(() => {
 <style scoped>
 .profile-container {
   display: flex;
-  flex-direction: column;
-  align-items: flex-end;
   position: absolute;
   top: 0;
   right: 0;
@@ -88,76 +114,29 @@ onBeforeUnmount(() => {
   padding-right: 20px;
 }
 
-.profile-controls {
+.profile-user {
   display: flex;
   align-items: center;
+  margin-right: 10px;
+  border-radius: 10px;
+  font-size: 14px;
   color: #fff;
+  line-height: 1;
 }
 
 .profile-avatar {
   width: 36px;
   height: 36px;
   margin-right: 10px;
-  background-color: #71717a;
-  box-shadow: 0 0 10px rgba(0, 0, 0, 0.3);
   border-radius: 25px;
-  font-size: 14px;
-  text-align: center;
-  line-height: 36px;
+}
+
+.profile-avatar img {
+  border-radius: 25px;
 }
 
 .profile-name {
-  outline: none;
-  align-items: center;
-  margin-right: 10px;
   padding: 10px;
-  font-size: 14px;
-  border-radius: 10px;
-  transition: all 0.2s ease-in-out;
-  cursor: pointer;
-}
-
-.profile-name:hover {
-  background-color: #71717a;
-}
-
-.profile-name:focus {
-  background-color: #71717a;
-}
-
-.profile-btn {
-  display: flex;
-  align-items: center;
-  padding: 10px;
-  background-color: #71717a;
-  box-shadow: 0 0 10px rgba(0, 0, 0, 0.3);
-  border-radius: 10px;
-}
-
-.profile-icon {
-  color: #fff;
-}
-
-.profile-icon-dot {
-  margin-left: 10px;
-  transform: rotate(90deg);
-}
-
-.profile-btn-theme {
-  outline: none;
-  transition: all 0.2s ease-in-out;
-}
-
-.profile-btn-theme:hover svg {
-  transition: all 0.2s ease-in-out;
-  color: #000;
-  transform: scale(1.1);
-}
-
-.profile-btn-theme:focus svg {
-  transition: all 0.2s ease-in-out;
-  color: #000;
-  transform: scale(1.1);
 }
 
 .profile-dropdown {
@@ -166,7 +145,7 @@ onBeforeUnmount(() => {
   top: 46px;
   right: 20px;
   width: 100%;
-  max-width: 192px;
+  max-width: 200px;
   padding: 10px;
   margin: 20px 0;
   background-color: #404045;
@@ -179,6 +158,9 @@ onBeforeUnmount(() => {
 }
 
 .profile-btn-action {
+  display: flex;
+  align-items: center;
+  justify-content: center;
   outline: none;
   width: 100%;
   padding: 10px;
@@ -197,7 +179,7 @@ onBeforeUnmount(() => {
 }
 
 .profile-btn-action--red:hover {
-  box-shadow: 0 0 10px rgba(255, 0, 0, 0.3);
+  box-shadow: 0 0 10px rgba(240, 85, 85, 0.3);
 }
 
 .profile-btn-action:focus {
@@ -207,7 +189,46 @@ onBeforeUnmount(() => {
 }
 
 .profile-btn-action--red:focus {
-  box-shadow: 0 0 10px rgba(255, 0, 0, 0.3);
+  box-shadow: 0 0 10px rgba(240, 85, 85, 0.3);
+}
+
+.profile-btn-icon {
+  margin-right: 10px;
+}
+
+.profile-controls {
+  padding: 10px;
+  background-color: #71717a;
+  box-shadow: 0 0 10px rgba(0, 0, 0, 0.3);
+  border-radius: 10px;
+}
+
+.profile-btn {
+  outline: none;
+  width: 16px;
+  height: 16px;
+  color: #fff;
+  transition: all 0.2s ease-in-out;
+}
+
+.profile-btn:not(:last-child) {
+  margin-right: 20px;
+}
+
+.profile-btn-dot {
+  transform: rotate(90deg);
+}
+
+.profile-btn:hover svg {
+  color: #292a2d;
+  transform: scale(1.1);
+  transition: all 0.2s ease-in-out;
+}
+
+.profile-btn:focus svg {
+  color: #292a2d;
+  transform: scale(1.1);
+  transition: all 0.2s ease-in-out;
 }
 
 .dropdown-enter-from,
