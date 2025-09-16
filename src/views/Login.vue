@@ -1,9 +1,7 @@
 <template>
   <div class="login-container">
-    <div class="login-logo-content">
-      <img class="login-logo" src="../../public/logo.png" alt="Логотип" />
-      <div class="login-title">Zoo</div>
-    </div>
+    <LogoHeader />
+    <div class="login-subtitle">Используйте свой email адрес для входа.</div>
     <form class="login-form" @submit.prevent="onSubmit">
       <div class="login-form-content-mb">
         <div :class="['login-input-container', { invalid: pError }]">
@@ -58,7 +56,7 @@
         <div class="login-or-right"></div>
       </div>
     </form>
-    <button class="login-btn-google btn-reset" @click="login">
+    <button class="login-btn-google btn-reset" @click="signInWithGoogle">
       <IconGoogle class="login-btn-icon" />
       Войти используя Google
     </button>
@@ -70,11 +68,12 @@ import IconMail from '@/assets/icons/icon-mail.svg'
 import IconPassword from '@/assets/icons/icon-password.svg'
 import IconGoogle from '@/assets/icons/icon-google.svg'
 import AppButton from '@/components/AppButton.vue'
+import LogoHeader from '@/components/ui/LogoHeader.vue'
 import { useForm, useField } from 'vee-validate'
 import * as yup from 'yup'
 import { computed, inject, watch } from 'vue'
 
-const login = inject('login')
+const signInWithGoogle = inject('signInWithGoogle')
 
 const { handleSubmit, isSubmitting, submitCount } = useForm()
 
@@ -123,24 +122,12 @@ watch(isToManyAttempts, (val) => {
   border-radius: 10px;
 }
 
-.login-logo-content {
-  display: flex;
-  align-items: center;
-  justify-content: center;
+.login-subtitle {
   margin-bottom: 20px;
-}
-
-.login-logo {
-  display: block;
-  height: 42px;
-  margin-right: 20px;
-}
-
-.login-title {
-  font-size: 36px;
-  font-weight: 900;
-  color: #fff;
-  line-height: 1;
+  text-align: center;
+  font-size: 10px;
+  font-weight: 300;
+  color: #71717a;
 }
 
 .login-form-content-mb {

@@ -65,7 +65,7 @@ function logout() {
   router.push('/login')
 }
 
-provide('login', signInWithGoogle)
+provide('signInWithGoogle', signInWithGoogle)
 provide('logout', logout)
 provide('userName', userName)
 provide('userAvatar', userAvatar)
