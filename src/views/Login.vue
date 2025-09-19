@@ -13,6 +13,7 @@
             placeholder="Введите email"
             v-model="eEmail"
             @blur="eBlur"
+            autocomplete="off"
           />
         </div>
         <small class="login-input-error" v-if="eError">{{ eError }}</small>
@@ -27,6 +28,7 @@
             placeholder="Введите пароль"
             v-model="pPassword"
             @blur="pBlur"
+            autocomplete="off"
           />
         </div>
         <small class="login-input-error" v-if="pError">{{ pError }}</small>
@@ -71,9 +73,53 @@ import AppButton from '@/components/AppButton.vue'
 import LogoHeader from '@/components/ui/LogoHeader.vue'
 import { useForm, useField } from 'vee-validate'
 import * as yup from 'yup'
-import { computed, inject, watch } from 'vue'
+import { computed, watch } from 'vue'
+import { auth } from '@/firebaseConfig'
+import {
+  signInWithEmailAndPassword,
+  GoogleAuthProvider,
+  signInWithPopup,
+} from 'firebase/auth'
+import { useRouter } from 'vue-router'
 
-const signInWithGoogle = inject('signInWithGoogle')
+const router = useRouter()
+
+async function signInWithEmail(email, password) {
+  try {
+    const userCredential = await signInWithEmailAndPassword(
+      auth,
+      email,
+      password
+    )
+    router.push('/chat')
+    console.log('Пользователь вошел:', userCredential.user)
+  } catch (error) {
+    console.error('Ошибка при входе:', error.code, error.message)
+  }
+}
+
+async function signInWithGoogle() {
+  if (auth.currentUser) {
+    userName.value = auth.currentUser.displayName
+    userAvatar.value = auth.currentUser.photoURL
+    router.push('/chat')
+    return
+  }
+
+  const provider = new GoogleAuthProvider()
+  try {
+    const result = await signInWithPopup(auth, provider)
+    const user = result.user
+
+    userName.value = user.displayName
+    userAvatar.value = user.photoURL
+    localStorage.setItem('userName', user.displayName || '')
+    localStorage.setItem('userAvatar', user.photoURL || '')
+    router.push('/chat')
+  } catch (error) {
+    console.error(error)
+  }
+}
 
 const { handleSubmit, isSubmitting, submitCount } = useForm()
 
@@ -99,8 +145,12 @@ const {
     .min(6, 'Пароль должен быть больше 6 символов')
 )
 
-const onSubmit = handleSubmit((values) => {
-  console.log(values)
+const onSubmit = handleSubmit(async (values) => {
+  try {
+    await signInWithEmail(values.email, values.password)
+  } catch (error) {
+    console.log('Ошибка при входе:', error)
+  }
 })
 
 const isToManyAttempts = computed(() => submitCount.value >= 3)

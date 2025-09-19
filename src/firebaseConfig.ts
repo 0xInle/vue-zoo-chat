@@ -1,13 +1,20 @@
 import { initializeApp } from 'firebase/app'
 import { getAuth, GoogleAuthProvider } from 'firebase/auth'
 
+const apiKey = import.meta.env.VITE_FB_API_KEY
+const authDomain = import.meta.env.VITE_FB_AUTH_DOMAIN
+const projectId = import.meta.env.VITE_FB_PROJECT_ID
+const storageBucket = import.meta.env.VITE_FB_STORAGE_BUCKET
+const messagingSenderId = import.meta.env.VITE_FB_MESSAGING_SENDER_ID
+const appId = import.meta.env.VITE_FB_APP_ID
+
 const firebaseConfig = {
-  apiKey: 'AIzaSyDLd1u-Uifj4ivGw447HJBs8WrmeuH8nIc',
-  authDomain: 'zoo-chat-48ce2.firebaseapp.com',
-  projectId: 'zoo-chat-48ce2',
-  storageBucket: 'zoo-chat-48ce2.firebasestorage.app',
-  messagingSenderId: '839373938824',
-  appId: '1:839373938824:web:bb98a70ce7132cbc4abf3d',
+  apiKey: apiKey,
+  authDomain: authDomain,
+  projectId: projectId,
+  storageBucket: storageBucket,
+  messagingSenderId: messagingSenderId,
+  appId: appId,
 }
 
 const app = initializeApp(firebaseConfig)

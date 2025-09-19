@@ -4,11 +4,11 @@
     <div class="forgot-reset-content">
       <h3 class="forgot-title">Сбросить пароль</h3>
       <div class="forgot-subtitle">
-        Введите свой адрес электронной почты, и мы вышлем вам проверочный код
-        для сброса пароля.
+        Введите свой адрес электронной почты, для восстановления входа в
+        систему.
       </div>
     </div>
-    <form class="forgot-form" @submit.prevent="">
+    <form class="forgot-form" @submit.prevent="resetPassword">
       <div class="forgot-input-container">
         <IconMail class="forgot-input-icon" />
         <input
@@ -16,34 +16,42 @@
           name="email"
           type="email"
           placeholder="Введите email"
+          v-model="email"
         />
       </div>
-      <div class="forgot-code-container">
-        <div class="forgot-input-container">
-          <IconHash class="forgot-input-icon" />
-          <input
-            class="forgot-input"
-            name="text"
-            type="text"
-            placeholder="Введите код"
-          />
-        </div>
-
-        <AppButton text="Получить код" class="forgot-btn-code" />
-      </div>
+      <AppButton text="Продолжить" class="forgot-btn-continue" type="submit" />
     </form>
-    <AppButton text="Продолжить" class="forgot-btn-continue" />
     <router-link to="/login" class="forgot-back-link link-reset"
       >Вернуться к входу</router-link
+    >
+    <router-link to="/reset" class="forgot-back-link link-reset"
+      >Сбросить</router-link
     >
   </div>
 </template>
 
 <script setup>
 import IconMail from '../assets/icons/icon-mail.svg'
-import IconHash from '../assets/icons/icon-hash.svg'
 import AppButton from '@/components/AppButton.vue'
 import LogoHeader from '@/components/ui/LogoHeader.vue'
+import { ref } from 'vue'
+import { sendPasswordResetEmail } from 'firebase/auth'
+import { auth } from '@/firebaseConfig'
+
+const email = ref('')
+
+async function resetPassword() {
+  try {
+    await sendPasswordResetEmail(auth, email.value)
+    console.log('Письмо для сброса пароля отправлено!')
+  } catch (error) {
+    console.error(
+      'Ошибка при отправке письма для сброса пароля:',
+      error.code,
+      error.message
+    )
+  }
+}
 </script>
 
 <style scoped>
@@ -116,12 +124,6 @@ import LogoHeader from '@/components/ui/LogoHeader.vue'
   box-shadow: 0 0 10px rgba(0, 0, 0, 0.3);
 }
 
-.forgot-code-container .forgot-input-container {
-  margin-bottom: 0;
-  flex: 1;
-  margin-right: 20px;
-}
-
 .forgot-input-icon {
   color: #fff;
 }
@@ -142,13 +144,8 @@ import LogoHeader from '@/components/ui/LogoHeader.vue'
   justify-content: space-between;
 }
 
-.forgot-btn-code {
-  white-space: nowrap;
-}
-
 .forgot-btn-continue {
   width: 100%;
-  margin-bottom: 20px;
 }
 
 .forgot-back-link {

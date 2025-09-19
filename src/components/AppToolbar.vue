@@ -8,8 +8,12 @@
       <IconCopy class="app-icon-copy" v-if="!copied" />
     </button>
     <IconCheck v-if="copied" style="margin-left: -10px; margin-right: 8px" />
-    <button class="app-icon-btn btn-reset" tabindex="-1">
-      <IconRegenerate @click="regenerateReplay(text)" />
+    <button
+      class="app-icon-btn btn-reset"
+      tabindex="-1"
+      @click="regenerateReplay(text)"
+    >
+      <IconRegenerate />
     </button>
   </div>
 </template>

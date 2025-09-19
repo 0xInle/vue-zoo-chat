@@ -66,11 +66,19 @@ import {
   type Ref,
 } from 'vue'
 import { onClickOutside } from '@vueuse/core'
+import { auth } from '@/firebaseConfig'
+import { useRouter } from 'vue-router'
 
 const userName = inject('userName') as Ref<string | null>
 const userAvatar = inject('userAvatar') as Ref<string | null>
+const router = useRouter()
 
-const logoutUser = inject<() => void>('logout')
+function logoutUser() {
+  auth.signOut()
+  userName.value = null
+  userAvatar.value = null
+  router.push('/login')
+}
 
 const isOpen = ref(false)
 const target = ref<HTMLElement | null>(null)

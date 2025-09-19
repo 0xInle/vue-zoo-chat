@@ -6,7 +6,10 @@
         Введите свой адрес электронной почты для регистрации.
       </div>
     </div>
-    <form class="register-form" @submit.prevent="">
+    <form
+      class="register-form"
+      @submit.prevent="registerWithEmail(email, password)"
+    >
       <div class="register-input-container">
         <IconMail class="register-input-icon" />
         <input
@@ -14,6 +17,7 @@
           name="email"
           type="email"
           placeholder="Введите email"
+          v-model="email"
         />
       </div>
       <div class="register-input-container">
@@ -23,6 +27,7 @@
           name="password"
           type="password"
           placeholder="Введите пароль"
+          v-model="password"
         />
       </div>
       <div class="register-input-container">
@@ -32,23 +37,15 @@
           name="password"
           type="password"
           placeholder="Подтвердите пароль"
+          v-model="confirm"
         />
       </div>
-      <div class="register-code-container">
-        <div class="register-input-container">
-          <IconHash class="register-input-icon" />
-          <input
-            class="register-input"
-            name="text"
-            type="text"
-            placeholder="Введите код"
-          />
-        </div>
-
-        <AppButton text="Получить код" class="register-btn-code" />
-      </div>
+      <AppButton
+        text="Зарегистрироваться"
+        class="register-btn-continue"
+        type="submit"
+      />
     </form>
-    <AppButton text="Войти" class="register-btn-continue" />
     <router-link to="/login" class="register-back-link link-reset"
       >Вернуться к входу</router-link
     >
@@ -58,9 +55,47 @@
 <script setup>
 import IconMail from '../assets/icons/icon-mail.svg'
 import IconPassword from '../assets/icons/icon-password.svg'
-import IconHash from '../assets/icons/icon-hash.svg'
 import AppButton from '@/components/AppButton.vue'
 import LogoHeader from '@/components/ui/LogoHeader.vue'
+import { ref } from 'vue'
+
+import { auth } from '@/firebaseConfig'
+import {
+  createUserWithEmailAndPassword,
+  sendEmailVerification,
+} from 'firebase/auth'
+import { useRouter } from 'vue-router'
+
+const email = ref()
+const password = ref()
+const confirm = ref()
+const router = useRouter()
+
+async function registerWithEmail(email, password) {
+  if (password === confirm.value) {
+    try {
+      const userCredential = await createUserWithEmailAndPassword(
+        auth,
+        email,
+        password
+      )
+      console.log('Пользователь зарегистрирован:', userCredential.user)
+      const actionCodeSettings = {
+        url: 'http://localhost:5173/verify',
+        handleCodeInApp: true,
+      }
+      await sendEmailVerification(userCredential.user, actionCodeSettings)
+
+      console.log('Письмо для верификации отправлено!')
+
+      router.push('/verify')
+    } catch (error) {
+      console.error('Ошибка при регистрации:', error.code, error.message)
+    }
+  } else {
+    console.log('Пароли не совпадают')
+  }
+}
 </script>
 
 <style scoped>
@@ -119,10 +154,13 @@ import LogoHeader from '@/components/ui/LogoHeader.vue'
   display: flex;
   align-items: center;
   padding-left: 10px;
-  margin-bottom: 20px;
   border: 1px solid #71717a;
   border-radius: 10px;
   box-shadow: 0 0 10px rgba(0, 0, 0, 0.3);
+}
+
+.register-input-container:not(:last-child) {
+  margin-bottom: 20px;
 }
 
 .register-input-icon {
@@ -145,7 +183,6 @@ import LogoHeader from '@/components/ui/LogoHeader.vue'
 
 .register-btn-continue {
   width: 100%;
-  margin-bottom: 20px;
 }
 
 .register-back-link {
@@ -166,17 +203,5 @@ import LogoHeader from '@/components/ui/LogoHeader.vue'
 
 .register-back-link:active {
   color: #fff;
-}
-
-.register-code-container {
-  display: flex;
-  align-items: center;
-  justify-content: space-between;
-}
-
-.register-code-container .register-input-container {
-  margin-bottom: 0;
-  flex: 1;
-  margin-right: 20px;
 }
 </style>
