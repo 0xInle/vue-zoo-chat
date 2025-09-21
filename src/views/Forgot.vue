@@ -64,7 +64,6 @@ const { isSubmitting, handleSubmit } = useForm()
 const formSubmit = handleSubmit(async function resetPassword() {
   try {
     await sendPasswordResetEmail(auth, eEmail.value)
-    console.log('Письмо для сброса пароля отправлено!')
     isSuccess.value = true
     eEmail.value = ''
   } catch (e) {

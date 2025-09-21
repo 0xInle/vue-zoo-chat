@@ -4,7 +4,7 @@
     <div class="login-subtitle">Используйте свой email адрес для входа.</div>
     <form class="login-form" @submit.prevent="onSubmit">
       <div class="login-form-content-mb">
-        <div :class="['login-input-container', { invalid: pError }]">
+        <div :class="['login-input-container', { invalid: eError && eEmail }]">
           <IconMail class="login-input-icon" />
           <input
             class="login-input"
@@ -12,14 +12,17 @@
             type="email"
             placeholder="Введите email"
             v-model="eEmail"
-            @blur="eBlur"
             autocomplete="off"
           />
         </div>
-        <small class="login-input-error" v-if="eError">{{ eError }}</small>
+        <small class="login-input-error" v-if="eError && eEmail">{{
+          eError
+        }}</small>
       </div>
       <div class="login-form-content-mb">
-        <div :class="['login-input-container', { invalid: pError }]">
+        <div
+          :class="['login-input-container', { invalid: pError && pPassword }]"
+        >
           <IconPassword class="login-input-icon" />
           <input
             class="login-input"
@@ -27,18 +30,19 @@
             type="password"
             placeholder="Введите пароль"
             v-model="pPassword"
-            @blur="pBlur"
             autocomplete="off"
           />
         </div>
-        <small class="login-input-error" v-if="pError">{{ pError }}</small>
+        <small class="login-input-error" v-if="pError && pPassword">{{
+          pError
+        }}</small>
       </div>
       <div class="login-btn-container">
         <AppButton
           text="Войти"
           class="login-btn"
           type="submit"
-          :disabled="isSubmitting || isToManyAttempts"
+          :disabled="isSubmitting || isToManyAttempts || !isFormValid"
         />
         <small class="login-button-error" v-if="isToManyAttempts"
           >Слишком частые попытки входа в систему</small
@@ -62,10 +66,13 @@
       <IconGoogle class="login-btn-icon" />
       Войти используя Google
     </button>
+    <small class="login-button-error" v-if="firebaseError">
+      {{ firebaseError }}
+    </small>
   </div>
 </template>
 
-<script setup>
+<script setup lang="ts">
 import IconMail from '@/assets/icons/icon-mail.svg'
 import IconPassword from '@/assets/icons/icon-password.svg'
 import IconGoogle from '@/assets/icons/icon-google.svg'
@@ -73,7 +80,7 @@ import AppButton from '@/components/AppButton.vue'
 import LogoHeader from '@/components/ui/LogoHeader.vue'
 import { useForm, useField } from 'vee-validate'
 import * as yup from 'yup'
-import { computed, watch } from 'vue'
+import { computed, watch, ref } from 'vue'
 import { auth } from '@/firebaseConfig'
 import {
   signInWithEmailAndPassword,
@@ -83,8 +90,14 @@ import {
 import { useRouter } from 'vue-router'
 
 const router = useRouter()
+const userName = ref()
+const userAvatar = ref()
 
-async function signInWithEmail(email, password) {
+const isFormValid = computed(() => {
+  return !eError.value && !!eEmail.value && !pError.value && !!pPassword.value
+})
+
+async function signInWithEmail(email: string, password: string) {
   try {
     const userCredential = await signInWithEmailAndPassword(
       auth,
@@ -93,10 +106,13 @@ async function signInWithEmail(email, password) {
     )
     router.push('/chat')
     console.log('Пользователь вошел:', userCredential.user)
-  } catch (error) {
+  } catch (e) {
+    const error = e as { code?: string; message?: string }
     console.error('Ошибка при входе:', error.code, error.message)
   }
 }
+
+const firebaseError = ref('')
 
 async function signInWithGoogle() {
   if (auth.currentUser) {
@@ -116,27 +132,52 @@ async function signInWithGoogle() {
     localStorage.setItem('userName', user.displayName || '')
     localStorage.setItem('userAvatar', user.photoURL || '')
     router.push('/chat')
-  } catch (error) {
-    console.error(error)
+  } catch (e) {
+    const error = e as { code?: string }
+    switch (error.code) {
+      case 'auth/popup-closed-by-user':
+        firebaseError.value =
+          'Вы закрыли окно входа. Пожалуйста, попробуйте еще раз.'
+        break
+      case 'auth/cancelled-popup-request':
+        firebaseError.value =
+          'Пожалуйста, не пытайтесь открыть несколько окон входа одновременно. Подождите завершения текущего процесса.'
+        break
+      case 'auth/account-exists-with-different-credential':
+        firebaseError.value =
+          'У вас уже есть аккаунт, зарегистрированный с другим способом входа. Пожалуйста, войдите, используя свой оригинальный способ.'
+        break
+      case 'auth/popup-blocked':
+        firebaseError.value =
+          'Всплывающее окно было заблокировано вашим браузером. Пожалуйста, разрешите всплывающие окна для этого сайта и попробуйте снова.'
+        break
+      case 'auth/network-request-failed':
+        firebaseError.value =
+          'Ошибка сети. Проверьте ваше интернет-соединение и попробуйте снова.'
+        break
+      case 'auth/user-disabled':
+        firebaseError.value =
+          'Ваша учетная запись была отключена. Пожалуйста, свяжитесь с поддержкой.'
+        break
+      case 'auth/too-many-requests':
+        firebaseError.value =
+          'Слишком много попыток входа. Пожалуйста, попробуйте снова через некоторое время.'
+        break
+      default:
+        firebaseError.value =
+          'Произошла непредвиденная ошибка при входе. Пожалуйста, попробуйте снова или обратитесь в службу поддержки.'
+    }
   }
 }
 
 const { handleSubmit, isSubmitting, submitCount } = useForm()
 
-const {
-  value: eEmail,
-  errorMessage: eError,
-  handleBlur: eBlur,
-} = useField(
+const { value: eEmail, errorMessage: eError } = useField(
   'email',
   yup.string().trim().required('Введите email').email('Некорректный email')
 )
 
-const {
-  value: pPassword,
-  errorMessage: pError,
-  handleBlur: pBlur,
-} = useField(
+const { value: pPassword, errorMessage: pError } = useField(
   'password',
   yup
     .string()
@@ -329,6 +370,5 @@ watch(isToManyAttempts, (val) => {
 .login-button-error {
   font-size: 10px;
   color: rgb(240, 85, 85);
-  align-self: center;
 }
 </style>
