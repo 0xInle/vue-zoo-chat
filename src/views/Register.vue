@@ -6,45 +6,79 @@
         Введите свой адрес электронной почты для регистрации.
       </div>
     </div>
-    <form
-      class="register-form"
-      @submit.prevent="registerWithEmail(email, password)"
-    >
-      <div class="register-input-container">
-        <IconMail class="register-input-icon" />
-        <input
-          class="register-input"
-          name="email"
-          type="email"
-          placeholder="Введите email"
-          v-model="email"
-        />
+    <form class="register-form" @submit.prevent="formSubmit">
+      <div class="register-form-content-mb">
+        <div
+          :class="['register-input-container', { invalid: eError && eEmail }]"
+        >
+          <IconMail class="register-input-icon" />
+          <input
+            class="register-input"
+            name="email"
+            type="email"
+            placeholder="Введите email"
+            v-model="eEmail"
+            autocomplete="off"
+          />
+        </div>
+        <small class="register-input-error" v-if="eError && eEmail">{{
+          eError
+        }}</small>
       </div>
-      <div class="register-input-container">
-        <IconPassword class="register-input-icon" />
-        <input
-          class="register-input"
-          name="password"
-          type="password"
-          placeholder="Введите пароль"
-          v-model="password"
-        />
+      <div class="register-form-content-mb">
+        <div
+          :class="[
+            'register-input-container',
+            { invalid: pError && pPassword },
+          ]"
+        >
+          <IconPassword class="register-input-icon" />
+          <input
+            class="register-input"
+            name="password"
+            type="password"
+            placeholder="Введите пароль"
+            v-model="pPassword"
+            autocomplete="off"
+          />
+        </div>
+        <small class="register-input-error" v-if="pError && pPassword">{{
+          pError
+        }}</small>
       </div>
-      <div class="register-input-container">
-        <IconPassword class="register-input-icon" />
-        <input
-          class="register-input"
-          name="password"
-          type="password"
-          placeholder="Подтвердите пароль"
-          v-model="confirm"
-        />
+      <div class="register-form-content-mb">
+        <div
+          :class="[
+            'register-input-container',
+            { invalid: cError && cPassword },
+          ]"
+        >
+          <IconPassword class="register-input-icon" />
+          <input
+            class="register-input"
+            name="confirm"
+            type="password"
+            placeholder="Подтвердите пароль"
+            v-model="cPassword"
+            autocomplete="off"
+          />
+        </div>
+        <small class="register-input-error" v-if="cError && cPassword">{{
+          cError
+        }}</small>
+        <small class="register-input-error" v-else>
+          {{ confirmError }}
+        </small>
       </div>
       <AppButton
         text="Зарегистрироваться"
         class="register-btn-continue"
         type="submit"
+        :disabled="isSubmitting || !isFormValid || !!confirmError"
       />
+      <small class="register-input-error" v-if="firebaseError">
+        {{ firebaseError }}
+      </small>
     </form>
     <router-link to="/login" class="register-back-link link-reset"
       >Вернуться к входу</router-link
@@ -52,27 +86,30 @@
   </div>
 </template>
 
-<script setup>
+<script setup lang="ts">
 import IconMail from '../assets/icons/icon-mail.svg'
 import IconPassword from '../assets/icons/icon-password.svg'
 import AppButton from '@/components/AppButton.vue'
 import LogoHeader from '@/components/ui/LogoHeader.vue'
-import { ref } from 'vue'
-
+import { ref, computed, watch } from 'vue'
 import { auth } from '@/firebaseConfig'
 import {
   createUserWithEmailAndPassword,
   sendEmailVerification,
 } from 'firebase/auth'
 import { useRouter } from 'vue-router'
+import { useForm, useField } from 'vee-validate'
+import * as yup from 'yup'
 
-const email = ref()
-const password = ref()
-const confirm = ref()
 const router = useRouter()
 
-async function registerWithEmail(email, password) {
-  if (password === confirm.value) {
+const { handleSubmit, isSubmitting } = useForm()
+
+const firebaseError = ref('')
+
+const formSubmit = handleSubmit(async function registerWithEmail(values) {
+  const { email, password } = values
+  if (!confirmError.value)
     try {
       const userCredential = await createUserWithEmailAndPassword(
         auth,
@@ -89,13 +126,74 @@ async function registerWithEmail(email, password) {
       console.log('Письмо для верификации отправлено!')
 
       router.push('/verify')
-    } catch (error) {
-      console.error('Ошибка при регистрации:', error.code, error.message)
+    } catch (e) {
+      const error = e as { code?: string }
+      switch (error.code) {
+        case 'auth/email-already-in-use':
+          firebaseError.value =
+            'Этот адрес электронной почты уже используется. Пожалуйста, войдите или используйте другой email.'
+          break
+        case 'auth/invalid-email':
+          firebaseError.value = 'Неверный формат электронной почты.'
+          break
+        case 'auth/weak-password':
+          firebaseError.value =
+            'Пароль слишком слабый. Пожалуйста, используйте более надежный пароль.'
+          break
+        case 'auth/operation-not-allowed':
+          firebaseError.value =
+            'Регистрация по почте и паролю временно недоступна. Пожалуйста, свяжитесь с поддержкой.'
+          break
+        default:
+          firebaseError.value =
+            'Произошла непредвиденная ошибка при регистрации. Пожалуйста, попробуйте еще раз.'
+      }
     }
+})
+
+const { value: eEmail, errorMessage: eError } = useField(
+  'email',
+  yup.string().trim().required('Введите email').email('Некорректный email')
+)
+
+const { value: pPassword, errorMessage: pError } = useField(
+  'password',
+  yup
+    .string()
+    .trim()
+    .required('Введите пароль')
+    .min(6, 'Пароль должен быть больше 6 символов')
+)
+
+const { value: cPassword, errorMessage: cError } = useField(
+  'confirm',
+  yup
+    .string()
+    .trim()
+    .required('Введите пароль')
+    .min(6, 'Пароль должен быть больше 6 символов')
+)
+
+const isFormValid = computed(() => {
+  return (
+    !eError.value &&
+    !!eEmail.value &&
+    !pError.value &&
+    !!pPassword.value &&
+    !cError.value &&
+    !!cPassword.value
+  )
+})
+
+const confirmError = ref('')
+
+watch([pPassword, cPassword], ([newPass, newConfirm]) => {
+  if (newConfirm && newPass !== newConfirm) {
+    confirmError.value = 'Пароли не совпадают'
   } else {
-    console.log('Пароли не совпадают')
+    confirmError.value = ''
   }
-}
+})
 </script>
 
 <style scoped>
@@ -150,6 +248,10 @@ async function registerWithEmail(email, password) {
   margin-bottom: 20px;
 }
 
+.register-form-content-mb {
+  margin-bottom: 20px;
+}
+
 .register-input-container {
   display: flex;
   align-items: center;
@@ -157,10 +259,6 @@ async function registerWithEmail(email, password) {
   border: 1px solid #71717a;
   border-radius: 10px;
   box-shadow: 0 0 10px rgba(0, 0, 0, 0.3);
-}
-
-.register-input-container:not(:last-child) {
-  margin-bottom: 20px;
 }
 
 .register-input-icon {
@@ -203,5 +301,19 @@ async function registerWithEmail(email, password) {
 
 .register-back-link:active {
   color: #fff;
+}
+
+.register-input-error {
+  font-size: 10px;
+  color: rgb(240, 85, 85);
+}
+
+.invalid {
+  border-color: rgb(240, 85, 85);
+}
+
+.register-btn-continue:disabled {
+  pointer-events: none;
+  opacity: 0.3;
 }
 </style>

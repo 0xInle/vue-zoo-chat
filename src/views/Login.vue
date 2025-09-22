@@ -44,9 +44,12 @@
           type="submit"
           :disabled="isSubmitting || isToManyAttempts || !isFormValid"
         />
-        <small class="login-button-error" v-if="isToManyAttempts"
-          >Слишком частые попытки входа в систему</small
-        >
+        <small class="login-button-error" v-if="isToManyAttempts">
+          Слишком частые попытки входа в систему
+        </small>
+        <small class="login-button-error" v-if="firebaseLoginError">
+          {{ firebaseLoginError }}
+        </small>
       </div>
       <div class="login-help flex">
         <router-link to="/forgot" class="login-help-link link-reset">
@@ -96,21 +99,6 @@ const userAvatar = ref()
 const isFormValid = computed(() => {
   return !eError.value && !!eEmail.value && !pError.value && !!pPassword.value
 })
-
-async function signInWithEmail(email: string, password: string) {
-  try {
-    const userCredential = await signInWithEmailAndPassword(
-      auth,
-      email,
-      password
-    )
-    router.push('/chat')
-    console.log('Пользователь вошел:', userCredential.user)
-  } catch (e) {
-    const error = e as { code?: string; message?: string }
-    console.error('Ошибка при входе:', error.code, error.message)
-  }
-}
 
 const firebaseError = ref('')
 
@@ -186,11 +174,54 @@ const { value: pPassword, errorMessage: pError } = useField(
     .min(6, 'Пароль должен быть больше 6 символов')
 )
 
+const firebaseLoginError = ref()
+let errorTimeoutId: number | null = null
+
 const onSubmit = handleSubmit(async (values) => {
+  firebaseLoginError.value = ''
+  if (errorTimeoutId) {
+    clearTimeout(errorTimeoutId)
+    errorTimeoutId = null
+  }
+
   try {
-    await signInWithEmail(values.email, values.password)
-  } catch (error) {
-    console.log('Ошибка при входе:', error)
+    await signInWithEmailAndPassword(auth, values.email, values.password)
+  } catch (e) {
+    const error = e as { code?: string }
+    switch (error.code) {
+      case 'auth/user-not-found':
+      case 'auth/wrong-password':
+      case 'auth/invalid-credential':
+        firebaseLoginError.value =
+          'Неверный адрес электронной почты или пароль.'
+        break
+      case 'auth/invalid-email':
+        firebaseLoginError.value = 'Неверный формат электронной почты.'
+        break
+      case 'auth/user-disabled':
+        firebaseLoginError.value =
+          'Ваша учетная запись была отключена. Пожалуйста, свяжитесь с поддержкой.'
+        break
+      case 'auth/operation-not-allowed':
+        firebaseLoginError.value =
+          'Вход по почте и паролю временно недоступен. Пожалуйста, свяжитесь с поддержкой.'
+        break
+      case 'auth/network-request-failed':
+        firebaseLoginError.value =
+          'Проблемы с подключением к сети. Пожалуйста, проверьте интернет-соединение.'
+        break
+      default:
+        firebaseLoginError.value =
+          'Произошла непредвиденная ошибка при входе. Пожалуйста, попробуйте еще раз.'
+        break
+    }
+
+    if (firebaseLoginError.value) {
+      errorTimeoutId = setTimeout(() => {
+        firebaseLoginError.value = ''
+        errorTimeoutId = null
+      }, 3000)
+    }
   }
 })
 

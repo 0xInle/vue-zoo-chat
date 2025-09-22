@@ -9,7 +9,7 @@
     </div>
     <form class="forgot-form" @submit.prevent="formSubmit">
       <div class="forgot-form-content-mb">
-        <div class="forgot-input-container">
+        <div :class="['forgot-input-container', { invalid: eError && eEmail }]">
           <IconMail class="forgot-input-icon" />
           <input
             class="forgot-input"
@@ -37,7 +37,7 @@
         :text="isSuccess ? 'Отправить снова' : 'Отправить письмо'"
         class="forgot-btn-continue"
         type="submit"
-        :disabled="isSubmitting || !eEmail"
+        :disabled="isSubmitting || !eEmail || eError"
       />
     </form>
     <router-link to="/login" class="forgot-back-link link-reset"
@@ -225,5 +225,9 @@ function onInput() {
 
 .forgot-form-content-mb {
   margin-bottom: 20px;
+}
+
+.invalid {
+  border-color: rgb(240, 85, 85);
 }
 </style>
