@@ -1,7 +1,7 @@
 <template>
   <div class="verify-container">
     <LogoHeader />
-    <div class="verify-reset-content">
+    <div class="verify-content">
       <div class="verify-subtitle">
         <p class="verify-text">
           На вашу почту отправлено письмо для подтверждения регистрации.
@@ -15,14 +15,20 @@
           вручную.
         </p>
       </div>
-      <router-link to="/chat">
+      <router-link to="/chat" :class="{ disabled: !!errorMessage }">
         <AppButton class="verify-btn" text="Перейти в приложение" />
       </router-link>
+      <small class="verify-error" v-if="errorMessage"
+        >{{ errorMessage }}
+      </small>
+      <small class="verify-message" v-else-if="successMessage"
+        >{{ successMessage }}
+      </small>
     </div>
   </div>
 </template>
 
-<script setup>
+<script setup lang="ts">
 import LogoHeader from '@/components/ui/LogoHeader.vue'
 import AppButton from '@/components/AppButton.vue'
 import { ref } from 'vue'
@@ -33,26 +39,75 @@ import { onAuthStateChanged, applyActionCode } from 'firebase/auth'
 const router = useRouter()
 const route = useRoute()
 const emailVerified = ref(false)
+const errorMessage = ref('')
+const successMessage = ref('')
 
 const checkEmail = async () => {
-  const user = auth.currentUser
-  if (user) {
-    await user.reload()
-    emailVerified.value = user.emailVerified
-    if (emailVerified.value) router.push('/chat')
+  try {
+    const user = auth.currentUser
+    if (user) {
+      await user.reload()
+      emailVerified.value = user.emailVerified
+      successMessage.value =
+        'Email подтвержден. Пожалуйста, войдите в приложение.'
+      if (emailVerified.value) router.push('/chat')
+    }
+  } catch (error) {
+    errorMessage.value =
+      'Произошла ошибка при обновлении статуса пользователя. Пожалуйста, попробуйте войти вручную.'
   }
 }
 
-const oobCode = route.query.oobCode
-if (oobCode) {
+const rawOobCode = route.query.oobCode
+
+let oobCode: string | null = null
+
+if (typeof rawOobCode === 'string' && rawOobCode.length > 0) {
+  oobCode = rawOobCode
+} else if (
+  Array.isArray(rawOobCode) &&
+  typeof rawOobCode[0] === 'string' &&
+  rawOobCode[0].length > 0
+) {
+  oobCode = rawOobCode[0]
+}
+
+if (!oobCode) {
+  errorMessage.value =
+    'Недействительная или отсутствующая ссылка для подтверждения email.'
+} else {
   applyActionCode(auth, oobCode)
     .then(() => checkEmail())
-    .catch((err) => console.error('Ошибка при подтверждении email:', err))
+    .catch((error) => {
+      switch (error.code) {
+        case 'auth/expired-action-code':
+          errorMessage.value =
+            'Срок действия ссылки для подтверждения истек. Пожалуйста, запросите письмо для подтверждения снова.'
+          break
+        case 'auth/invalid-action-code':
+          errorMessage.value =
+            'Ссылка для подтверждения недействительна или уже была использована.'
+          break
+        case 'auth/user-disabled':
+          errorMessage.value =
+            'Ваша учетная запись была отключена. Пожалуйста, свяжитесь с поддержкой.'
+          break
+        case 'auth/user-not-found':
+          errorMessage.value =
+            'Не удалось найти пользователя, связанного с этой ссылкой. Возможно, учетная запись была удалена.'
+          break
+        default:
+          errorMessage.value =
+            'Произошла непредвиденная ошибка при подтверждении email. Пожалуйста, попробуйте еще раз.'
+          break
+      }
+    })
 }
 
 onAuthStateChanged(auth, (user) => {
   if (user && user.emailVerified) {
     emailVerified.value = true
+    successMessage.value = 'Email подтвержден'
     router.push('/chat')
   }
 })
@@ -89,5 +144,16 @@ onAuthStateChanged(auth, (user) => {
 
 .verify-btn {
   width: 100%;
+}
+
+.verify-error,
+.verify-message {
+  font-size: 10px;
+  color: rgb(240, 85, 85);
+}
+
+.disabled {
+  pointer-events: none;
+  opacity: 0.3;
 }
 </style>
