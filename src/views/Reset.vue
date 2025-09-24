@@ -17,10 +17,14 @@
             <input
               class="reset-input"
               name="password"
-              type="password"
+              :type="viewPassword ? 'text' : 'password'"
               placeholder="Новый пароль"
               v-model="pPassword"
               autocomplete="off"
+            />
+            <ViewPasswordButton
+              :showPassword="viewPassword"
+              @toggle="viewPassword = !viewPassword"
             />
           </div>
           <small class="reset-input-error" v-if="pError && pPassword"
@@ -35,10 +39,14 @@
             <input
               class="reset-input"
               name="confirm"
-              type="password"
+              :type="viewConfirmPassword ? 'text' : 'password'"
               placeholder="Подтвердите пароль"
               v-model="cPassword"
               autocomplete="off"
+            />
+            <ViewPasswordButton
+              :showPassword="viewConfirmPassword"
+              @toggle="viewConfirmPassword = !viewConfirmPassword"
             />
           </div>
           <small class="reset-input-error" v-if="cError && cPassword">{{
@@ -76,33 +84,19 @@ import { useRoute, useRouter } from 'vue-router'
 import { auth } from '@/firebaseConfig'
 import { confirmPasswordReset } from 'firebase/auth'
 import { ref, watch, computed } from 'vue'
-import { useForm, useField } from 'vee-validate'
-import * as yup from 'yup'
+import { useValidateForm } from '@/composables/useValidateForm'
+import ViewPasswordButton from '@/components/ui/ViewPasswordButton.vue'
+
+const viewPassword = ref(false)
+const viewConfirmPassword = ref(false)
 
 const route = useRoute()
 const router = useRouter()
 const errorMessage = ref('')
 const successMessage = ref('')
 
-const { handleSubmit, isSubmitting } = useForm()
-
-const { value: pPassword, errorMessage: pError } = useField<string>(
-  'password',
-  yup
-    .string()
-    .trim()
-    .required('Введите пароль')
-    .min(6, 'Пароль должен быть больше 6 символов')
-)
-
-const { value: cPassword, errorMessage: cError } = useField(
-  'confirm',
-  yup
-    .string()
-    .trim()
-    .required('Введите пароль')
-    .min(6, 'Пароль должен быть больше 6 символов')
-)
+const { handleSubmit, pError, pPassword, cError, cPassword, isSubmitting } =
+  useValidateForm()
 
 const confirmError = ref('')
 
@@ -143,7 +137,7 @@ async function handlePasswordReset() {
   }
 
   try {
-    await confirmPasswordReset(auth, oobCode, pPassword.value)
+    await confirmPasswordReset(auth, oobCode, pPassword.value as string)
     successMessage.value =
       'Ваш пароль успешно изменен. Теперь вы можете войти с новым паролем.'
     setTimeout(() => router.push('/login'), 3000)
@@ -227,6 +221,7 @@ const isFormValid = computed(() => {
   display: flex;
   align-items: center;
   padding-left: 10px;
+  padding-right: 10px;
   border: 1px solid #71717a;
   border-radius: 10px;
   box-shadow: 0 0 10px rgba(0, 0, 0, 0.3);
@@ -238,6 +233,7 @@ const isFormValid = computed(() => {
 
 .reset-input {
   outline: none;
+  width: 100%;
   padding: 10px;
   background-color: transparent;
   border: none;

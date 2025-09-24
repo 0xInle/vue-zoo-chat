@@ -52,18 +52,17 @@ import AppButton from '@/components/AppButton.vue'
 import LogoHeader from '@/components/ui/LogoHeader.vue'
 import { sendPasswordResetEmail } from 'firebase/auth'
 import { auth } from '@/firebaseConfig'
-import { useForm, useField } from 'vee-validate'
-import * as yup from 'yup'
 import { ref } from 'vue'
+import { useValidateForm } from '@/composables/useValidateForm'
 
 const isSuccess = ref(false)
 const firebaseError = ref('')
 
-const { isSubmitting, handleSubmit } = useForm()
+const { handleSubmit, eError, eEmail, isSubmitting } = useValidateForm()
 
 const formSubmit = handleSubmit(async function resetPassword() {
   try {
-    await sendPasswordResetEmail(auth, eEmail.value)
+    await sendPasswordResetEmail(auth, eEmail.value as string)
     isSuccess.value = true
     eEmail.value = ''
   } catch (e) {
@@ -83,11 +82,6 @@ const formSubmit = handleSubmit(async function resetPassword() {
     }
   }
 })
-
-const { value: eEmail, errorMessage: eError } = useField<string>(
-  'email',
-  yup.string().trim().required('Введите email').email('Некорректный email')
-)
 
 function onInput() {
   isSuccess.value = false

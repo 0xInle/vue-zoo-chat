@@ -27,10 +27,14 @@
           <input
             class="login-input"
             name="password"
-            type="password"
+            :type="viewPassword ? 'text' : 'password'"
             placeholder="Введите пароль"
             v-model="pPassword"
             autocomplete="off"
+          />
+          <ViewPasswordButton
+            :showPassword="viewPassword"
+            @toggle="viewPassword = !viewPassword"
           />
         </div>
         <small class="login-input-error" v-if="pError && pPassword">{{
@@ -81,8 +85,7 @@ import IconPassword from '@/assets/icons/icon-password.svg'
 import IconGoogle from '@/assets/icons/icon-google.svg'
 import AppButton from '@/components/AppButton.vue'
 import LogoHeader from '@/components/ui/LogoHeader.vue'
-import { useForm, useField } from 'vee-validate'
-import * as yup from 'yup'
+import ViewPasswordButton from '@/components/ui/ViewPasswordButton.vue'
 import { computed, watch, ref } from 'vue'
 import { auth } from '@/firebaseConfig'
 import {
@@ -91,6 +94,19 @@ import {
   signInWithPopup,
 } from 'firebase/auth'
 import { useRouter } from 'vue-router'
+import { useValidateForm } from '@/composables/useValidateForm'
+
+const viewPassword = ref(false)
+
+const {
+  eError,
+  eEmail,
+  pError,
+  pPassword,
+  handleSubmit,
+  submitCount,
+  isSubmitting,
+} = useValidateForm()
 
 const router = useRouter()
 const userName = ref()
@@ -157,22 +173,6 @@ async function signInWithGoogle() {
     }
   }
 }
-
-const { handleSubmit, isSubmitting, submitCount } = useForm()
-
-const { value: eEmail, errorMessage: eError } = useField(
-  'email',
-  yup.string().trim().required('Введите email').email('Некорректный email')
-)
-
-const { value: pPassword, errorMessage: pError } = useField(
-  'password',
-  yup
-    .string()
-    .trim()
-    .required('Введите пароль')
-    .min(6, 'Пароль должен быть больше 6 символов')
-)
 
 const firebaseLoginError = ref()
 let errorTimeoutId: number | null = null
@@ -260,6 +260,7 @@ watch(isToManyAttempts, (val) => {
   display: flex;
   align-items: center;
   padding-left: 10px;
+  padding-right: 10px;
   border: 1px solid #71717a;
   border-radius: 10px;
   box-shadow: 0 0 10px rgba(0, 0, 0, 0.3);
@@ -279,9 +280,9 @@ watch(isToManyAttempts, (val) => {
   color: #fff;
 }
 
-.login-input:not(:last-child) {
+/* .login-input:not(:last-child) {
   margin-bottom: 10px;
-}
+} */
 
 .login-btn {
   width: 100%;

@@ -36,10 +36,14 @@
           <input
             class="register-input"
             name="password"
-            type="password"
+            :type="viewPassword ? 'text' : 'password'"
             placeholder="Введите пароль"
             v-model="pPassword"
             autocomplete="off"
+          />
+          <ViewPasswordButton
+            :showPassword="viewPassword"
+            @toggle="viewPassword = !viewPassword"
           />
         </div>
         <small class="register-input-error" v-if="pError && pPassword">{{
@@ -57,10 +61,14 @@
           <input
             class="register-input"
             name="confirm"
-            type="password"
+            :type="viewConfirmPassword ? 'text' : 'password'"
             placeholder="Подтвердите пароль"
             v-model="cPassword"
             autocomplete="off"
+          />
+          <ViewPasswordButton
+            :showPassword="viewConfirmPassword"
+            @toggle="viewConfirmPassword = !viewConfirmPassword"
           />
         </div>
         <small class="register-input-error" v-if="cError && cPassword">{{
@@ -91,19 +99,32 @@ import IconMail from '../assets/icons/icon-mail.svg'
 import IconPassword from '../assets/icons/icon-password.svg'
 import AppButton from '@/components/AppButton.vue'
 import LogoHeader from '@/components/ui/LogoHeader.vue'
-import { ref, computed, watch } from 'vue'
+import { ref, computed } from 'vue'
 import { auth } from '@/firebaseConfig'
 import {
   createUserWithEmailAndPassword,
   sendEmailVerification,
 } from 'firebase/auth'
 import { useRouter } from 'vue-router'
-import { useForm, useField } from 'vee-validate'
-import * as yup from 'yup'
+import { useValidateForm } from '@/composables/useValidateForm'
+import ViewPasswordButton from '@/components/ui/ViewPasswordButton.vue'
+
+const viewPassword = ref(false)
+const viewConfirmPassword = ref(false)
+
+const {
+  eError,
+  eEmail,
+  handleSubmit,
+  isSubmitting,
+  pPassword,
+  pError,
+  cPassword,
+  cError,
+  confirmError,
+} = useValidateForm()
 
 const router = useRouter()
-
-const { handleSubmit, isSubmitting } = useForm()
 
 const firebaseError = ref('')
 
@@ -151,29 +172,6 @@ const formSubmit = handleSubmit(async function registerWithEmail(values) {
     }
 })
 
-const { value: eEmail, errorMessage: eError } = useField(
-  'email',
-  yup.string().trim().required('Введите email').email('Некорректный email')
-)
-
-const { value: pPassword, errorMessage: pError } = useField(
-  'password',
-  yup
-    .string()
-    .trim()
-    .required('Введите пароль')
-    .min(6, 'Пароль должен быть больше 6 символов')
-)
-
-const { value: cPassword, errorMessage: cError } = useField(
-  'confirm',
-  yup
-    .string()
-    .trim()
-    .required('Введите пароль')
-    .min(6, 'Пароль должен быть больше 6 символов')
-)
-
 const isFormValid = computed(() => {
   return (
     !eError.value &&
@@ -183,16 +181,6 @@ const isFormValid = computed(() => {
     !cError.value &&
     !!cPassword.value
   )
-})
-
-const confirmError = ref('')
-
-watch([pPassword, cPassword], ([newPass, newConfirm]) => {
-  if (newConfirm && newPass !== newConfirm) {
-    confirmError.value = 'Пароли не совпадают'
-  } else {
-    confirmError.value = ''
-  }
 })
 </script>
 
@@ -256,6 +244,7 @@ watch([pPassword, cPassword], ([newPass, newConfirm]) => {
   display: flex;
   align-items: center;
   padding-left: 10px;
+  padding-right: 10px;
   border: 1px solid #71717a;
   border-radius: 10px;
   box-shadow: 0 0 10px rgba(0, 0, 0, 0.3);
