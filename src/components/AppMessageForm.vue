@@ -133,7 +133,7 @@ watch(
 
 .form-wrapper {
   margin: 0 auto;
-  background-color: #404045;
+  background-color: var(--bg-color);
   box-shadow: 0 0 10px rgba(0, 0, 0, 0.3);
   border-radius: 10px;
   padding: 10px 20px;
@@ -146,7 +146,7 @@ watch(
   outline: none;
   background-color: transparent;
   border: none;
-  color: #fff;
+  color: var(--text-color);
   margin-bottom: 10px;
   white-space: pre-wrap;
 }

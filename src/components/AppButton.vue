@@ -13,21 +13,21 @@ const { text } = defineProps<{ text: string }>()
   outline: none;
   align-self: flex-end;
   padding: 10px;
-  background-color: #71717a;
+  background-color: var(--btn-color);
   box-shadow: 0 0 10px rgba(0, 0, 0, 0.3);
   border-radius: 10px;
-  color: #fff;
+  color: var(--text-color);
   font-size: 14px;
   transition: all 0.2s ease-in-out;
 }
 
 .btn:hover {
-  background-color: #fff;
-  color: #000;
+  background-color: var(--text-color);
+  color: var(--dark-color);
 }
 
 .btn:focus {
-  background-color: #fff;
-  color: #000;
+  background-color: var(--text-color);
+  color: var(--dark-color);
 }
 </style>

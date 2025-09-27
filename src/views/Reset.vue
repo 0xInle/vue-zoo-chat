@@ -1,4 +1,6 @@
 <template>
+  <ErrorForm v-if="errorMessage" :text="errorMessage" />
+  <ErrorForm v-else-if="successMessage" :text="successMessage" />
   <div class="reset-container">
     <LogoHeader />
     <div class="reset-content">
@@ -60,14 +62,8 @@
           text="Обновить пароль"
           type="submit"
           class="reset-btn"
-          :disabled="isFormValid"
+          :disabled="isFormValid || isLoading"
         />
-        <small class="reset-button-error" v-if="errorMessage">
-          {{ errorMessage }}
-        </small>
-        <small class="reset-button-error" v-if="successMessage">
-          {{ successMessage }}
-        </small>
       </form>
       <router-link to="/register" class="reset-back-link link-reset">
         Регистрация
@@ -79,26 +75,28 @@
 <script setup lang="ts">
 import LogoHeader from '@/components/ui/LogoHeader.vue'
 import AppButton from '@/components/AppButton.vue'
+import ErrorForm from '@/components/ui/ErrorForm.vue'
 import IconPassword from '../assets/icons/icon-password.svg'
+import ViewPasswordButton from '@/components/ui/ViewPasswordButton.vue'
 import { useRoute, useRouter } from 'vue-router'
 import { auth } from '@/firebaseConfig'
 import { confirmPasswordReset } from 'firebase/auth'
 import { ref, watch, computed } from 'vue'
 import { useValidateForm } from '@/composables/useValidateForm'
-import ViewPasswordButton from '@/components/ui/ViewPasswordButton.vue'
+import { useErrorHandler } from '@/composables/useErrorHanler'
+import { useTimeoutError } from '@/composables/useTimeoutError'
+import { useTimeoutFn } from '@vueuse/core'
 
+const { handleSubmit, pError, pPassword, cError, cPassword, isSubmitting } =
+  useValidateForm()
 const viewPassword = ref(false)
 const viewConfirmPassword = ref(false)
-
 const route = useRoute()
 const router = useRouter()
 const errorMessage = ref('')
 const successMessage = ref('')
-
-const { handleSubmit, pError, pPassword, cError, cPassword, isSubmitting } =
-  useValidateForm()
-
 const confirmError = ref('')
+const isLoading = ref(false)
 
 watch([pPassword, cPassword], ([newPass, newConfirm]) => {
   if (newConfirm && newPass !== newConfirm) {
@@ -109,7 +107,6 @@ watch([pPassword, cPassword], ([newPass, newConfirm]) => {
 })
 
 const rawOobCode = route.query.oobCode
-
 let oobCode: string | null = null
 
 if (typeof rawOobCode === 'string' && rawOobCode.length > 0) {
@@ -129,6 +126,7 @@ if (!oobCode) {
 async function handlePasswordReset() {
   errorMessage.value = ''
   successMessage.value = ''
+  isLoading.value = true
 
   if (!oobCode) {
     errorMessage.value =
@@ -140,33 +138,18 @@ async function handlePasswordReset() {
     await confirmPasswordReset(auth, oobCode, pPassword.value as string)
     successMessage.value =
       'Ваш пароль успешно изменен. Теперь вы можете войти с новым паролем.'
-    setTimeout(() => router.push('/login'), 3000)
+    useTimeoutFn(() => {
+      router.push('/login')
+    }, 3000).start()
   } catch (e) {
     const error = e as { code?: string }
-    switch (error.code) {
-      case 'auth/expired-action-code':
-        errorMessage.value =
-          'Срок действия ссылки для сброса пароля истек. Пожалуйста, запросите сброс пароля снова.'
-        break
-      case 'auth/invalid-action-code':
-        errorMessage.value =
-          'Недействительный код действия. Возможно, ссылка уже использована или повреждена.'
-        break
-      case 'auth/user-disabled':
-        errorMessage.value =
-          'Ваш аккаунт отключен. Пожалуйста, свяжитесь с поддержкой.'
-        break
-      case 'auth/user-not-found':
-        errorMessage.value = 'Пользователь с таким email не найден.'
-        break
-      case 'auth/weak-password':
-        errorMessage.value =
-          'Пароль слишком слабый. Пожалуйста, используйте более сложный пароль.'
-        break
-      default:
-        errorMessage.value =
-          'Извините, произошла непредвиденная ошибка. Пожалуйста, попробуйте еще раз через несколько минут. Если проблема сохраняется, свяжитесь с нашей службой поддержки.'
+    errorMessage.value = useErrorHandler(error.code, 'reset')
+
+    if (errorMessage.value) {
+      useTimeoutError(errorMessage, 5000)
     }
+  } finally {
+    isLoading.value = false
   }
 }
 
@@ -190,8 +173,7 @@ const isFormValid = computed(() => {
   align-items: center;
   width: 30%;
   padding: 20px;
-  margin-bottom: 50px;
-  border: 1px solid #71717a;
+  border: 1px solid var(--btn-color);
   box-shadow: 0 0 10px rgba(0, 0, 0, 0.3);
   border-radius: 10px;
 }
@@ -209,7 +191,7 @@ const isFormValid = computed(() => {
   margin-bottom: 20px;
   font-size: 10px;
   font-weight: 300;
-  color: #71717a;
+  color: var(--btn-color);
 }
 
 .reset-form {
@@ -222,13 +204,14 @@ const isFormValid = computed(() => {
   align-items: center;
   padding-left: 10px;
   padding-right: 10px;
-  border: 1px solid #71717a;
+  border: 1px solid var(--btn-color);
   border-radius: 10px;
   box-shadow: 0 0 10px rgba(0, 0, 0, 0.3);
+  transition: all 0.2s ease-in-out;
 }
 
 .reset-input-icon {
-  color: #fff;
+  color: var(--text-color);
 }
 
 .reset-input {
@@ -238,7 +221,7 @@ const isFormValid = computed(() => {
   background-color: transparent;
   border: none;
   font-size: 14px;
-  color: #fff;
+  color: var(--text-color);
 }
 
 .reset-btn {
@@ -253,34 +236,37 @@ const isFormValid = computed(() => {
 .reset-back-link {
   text-align: center;
   outline: none;
-  color: #71717a;
+  color: var(--btn-color);
   font-size: 10px;
   transition: all 0.2s ease-in-out;
 }
 
 .reset-back-link:hover {
-  color: #fff;
+  color: var(--text-color);
 }
 
 .reset-back-link:focus {
-  color: #fff;
+  color: var(--text-color);
 }
 
 .reset-back-link:active {
-  color: #fff;
+  color: var(--text-color);
 }
 
 .reset-form-content-mb {
+  position: relative;
   margin-bottom: 20px;
 }
 
 .invalid {
-  border-color: rgb(240, 85, 85);
+  border-color: var(--error-color);
 }
 
 .reset-input-error,
 .reset-button-error {
+  position: absolute;
+  bottom: -15px;
   font-size: 10px;
-  color: rgb(240, 85, 85);
+  color: var(--error-color);
 }
 </style>

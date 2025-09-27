@@ -15,11 +15,21 @@ const props = defineProps({ showPassword: Boolean })
 
 <style scoped>
 .btn-eye {
+  outline: none;
   width: 16px;
   height: 16px;
+  transition: all 0.2s ease-in-out;
+}
+
+.btn-eye:hover .icon {
+  transform: scale(1.1);
+}
+
+.btn-eye:focus .icon {
+  transform: scale(1.1);
 }
 
 .icon {
-  color: #fff;
+  color: var(--text-color);
 }
 </style>

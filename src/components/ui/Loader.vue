@@ -12,7 +12,7 @@
   width: 8px;
   height: 8px;
   margin: 0 2px;
-  background: #fff;
+  background: var(--text-color);
   border-radius: 50%;
   animation: blink 1.4s infinite both;
 }

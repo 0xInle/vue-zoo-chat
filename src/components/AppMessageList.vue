@@ -88,7 +88,7 @@ watch(
   margin-bottom: 50px;
   font-size: 14px;
   line-height: 1.5;
-  color: #fff;
+  color: var(--text-color);
 }
 
 .app-answer:last-child {
@@ -101,7 +101,7 @@ watch(
   max-width: 50%;
   padding: 10px;
   max-width: fit-content;
-  background-color: #404045;
+  background-color: var(--bg-color);
   border-radius: 10px;
 }
 
@@ -111,9 +111,9 @@ watch(
 
 .error-message {
   padding: 10px;
-  border: 1px solid rgb(240, 85, 85);
+  border: 1px solid var(--error-color);
   border-radius: 10px;
-  color: rgb(240, 85, 85);
+  color: var(--error-color);
   box-shadow: 0 0 10px rgba(240, 85, 85, 0.3);
 }
 </style>

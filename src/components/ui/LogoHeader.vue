@@ -22,7 +22,7 @@
 .title {
   font-size: 36px;
   font-weight: 900;
-  color: #fff;
+  color: var(--text-color);
   line-height: 1;
 }
 </style>

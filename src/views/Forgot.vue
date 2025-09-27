@@ -1,4 +1,9 @@
 <template>
+  <ErrorForm v-if="firebaseError" :text="firebaseError" />
+  <ErrorForm
+    v-else-if="isSuccess"
+    text="Письмо для сброса пароля отправлено. Проверьте вашу почту."
+  />
   <div class="forgot-container">
     <LogoHeader />
     <div class="forgot-reset-content">
@@ -18,26 +23,14 @@
             placeholder="Введите email"
             v-model="eEmail"
             autocomplete="off"
-            @input="onInput"
           />
         </div>
-        <small
-          class="forgot-input-error"
-          v-if="eError && !isSuccess && eEmail"
-          >{{ eError }}</small
-        >
-        <small class="forgot-input-confirm" v-if="isSuccess"
-          >Письмо для сброса пароля отправлено. Проверьте вашу почту.</small
-        >
-        <small v-if="firebaseError" class="forgot-input-error">
-          {{ firebaseError }}
-        </small>
       </div>
       <AppButton
         :text="isSuccess ? 'Отправить снова' : 'Отправить письмо'"
         class="forgot-btn-continue"
         type="submit"
-        :disabled="isSubmitting || !eEmail || eError"
+        :disabled="isSubmitting || !eEmail || eError || isLoading"
       />
     </form>
     <router-link to="/login" class="forgot-back-link link-reset"
@@ -50,42 +43,41 @@
 import IconMail from '../assets/icons/icon-mail.svg'
 import AppButton from '@/components/AppButton.vue'
 import LogoHeader from '@/components/ui/LogoHeader.vue'
+import ErrorForm from '@/components/ui/ErrorForm.vue'
 import { sendPasswordResetEmail } from 'firebase/auth'
 import { auth } from '@/firebaseConfig'
 import { ref } from 'vue'
 import { useValidateForm } from '@/composables/useValidateForm'
+import { useErrorHandler } from '@/composables/useErrorHanler'
+import { useTimeoutError } from '@/composables/useTimeoutError'
 
 const isSuccess = ref(false)
 const firebaseError = ref('')
+const isLoading = ref(false)
+const { eError, eEmail, isSubmitting } = useValidateForm()
 
-const { handleSubmit, eError, eEmail, isSubmitting } = useValidateForm()
+const formSubmit = async function resetPassword() {
+  firebaseError.value = ''
+  isLoading.value = true
 
-const formSubmit = handleSubmit(async function resetPassword() {
   try {
     await sendPasswordResetEmail(auth, eEmail.value as string)
     isSuccess.value = true
     eEmail.value = ''
   } catch (e) {
     const error = e as { code?: string }
-    switch (error.code) {
-      case 'auth/invalid-email':
-        firebaseError.value = 'Некорректный email'
-        break
-      case 'auth/user-not-found':
-        firebaseError.value = 'Пользователь с таким email не найден'
-        break
-      case 'auth/too-many-requests':
-        firebaseError.value = 'Слишком много попыток, попробуйте позже'
-        break
-      default:
-        firebaseError.value = 'Ошибка при отправке письма'
+    firebaseError.value = useErrorHandler(error.code, 'forgot')
+
+    if (firebaseError.value) {
+      useTimeoutError(firebaseError, 5000)
+    }
+  } finally {
+    isLoading.value = false
+
+    if (isSuccess.value) {
+      useTimeoutError(isSuccess, 5000)
     }
   }
-})
-
-function onInput() {
-  isSuccess.value = false
-  firebaseError.value = ''
 }
 </script>
 
@@ -96,8 +88,7 @@ function onInput() {
   align-items: center;
   width: 30%;
   padding: 20px;
-  margin-bottom: 50px;
-  border: 1px solid #71717a;
+  border: 1px solid var(--btn-color);
   box-shadow: 0 0 10px rgba(0, 0, 0, 0.3);
   border-radius: 10px;
 }
@@ -118,7 +109,7 @@ function onInput() {
 .forgot-logo-title {
   font-size: 36px;
   font-weight: 900;
-  color: #fff;
+  color: var(--text-color);
   line-height: 1;
 }
 
@@ -132,7 +123,7 @@ function onInput() {
 .forgot-title {
   margin: 0;
   margin-bottom: 10px;
-  color: #71717a;
+  color: var(--btn-color);
   font-size: 16px;
   font-weight: 400;
 }
@@ -141,7 +132,7 @@ function onInput() {
   text-align: center;
   font-size: 10px;
   font-weight: 300;
-  color: #71717a;
+  color: var(--btn-color);
 }
 
 .forgot-form {
@@ -153,13 +144,14 @@ function onInput() {
   display: flex;
   align-items: center;
   padding-left: 10px;
-  border: 1px solid #71717a;
+  border: 1px solid var(--btn-color);
   border-radius: 10px;
   box-shadow: 0 0 10px rgba(0, 0, 0, 0.3);
+  transition: all 0.2s ease-in-out;
 }
 
 .forgot-input-icon {
-  color: #fff;
+  color: var(--text-color);
 }
 
 .forgot-input {
@@ -169,7 +161,7 @@ function onInput() {
   background-color: transparent;
   border: none;
   font-size: 14px;
-  color: #fff;
+  color: var(--text-color);
 }
 
 .forgot-code-container {
@@ -190,31 +182,31 @@ function onInput() {
 .forgot-back-link {
   text-align: center;
   outline: none;
-  color: #71717a;
+  color: var(--btn-color);
   font-size: 10px;
   transition: all 0.2s ease-in-out;
 }
 
 .forgot-back-link:hover {
-  color: #fff;
+  color: var(--text-color);
 }
 
 .forgot-back-link:focus {
-  color: #fff;
+  color: var(--text-color);
 }
 
 .forgot-back-link:active {
-  color: #fff;
+  color: var(--text-color);
 }
 
 .forgot-input-error {
   font-size: 10px;
-  color: rgb(240, 85, 85);
+  color: var(--error-color);
 }
 
 .forgot-input-confirm {
   font-size: 10px;
-  color: rgb(240, 85, 85);
+  color: var(--error-color);
 }
 
 .forgot-form-content-mb {
@@ -222,6 +214,6 @@ function onInput() {
 }
 
 .invalid {
-  border-color: rgb(240, 85, 85);
+  border-color: var(--error-color);
 }
 </style>

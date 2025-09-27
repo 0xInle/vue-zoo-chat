@@ -60,7 +60,7 @@ function addChat() {
   display: flex;
   align-items: center;
   padding: 10px;
-  background-color: #71717a;
+  background-color: var(--btn-color);
   box-shadow: 0 0 10px rgba(0, 0, 0, 0.3);
   border-radius: 10px;
 }
@@ -77,17 +77,17 @@ function addChat() {
 }
 
 .logo-icon {
-  color: #fff;
+  color: var(--text-color);
   transition: all 0.2s ease-in-out;
 }
 
 .logo-btn:hover .logo-icon {
-  color: #292a2d;
+  color: var(--bg-page-color);
   transform: scale(1.1);
 }
 
 .logo-btn:focus .logo-icon {
-  color: #292a2d;
+  color: var(--bg-page-color);
   transform: scale(1.1);
 }
 </style>

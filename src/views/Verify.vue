@@ -1,4 +1,6 @@
 <template>
+  <ErrorForm v-if="errorMessage" :text="errorMessage" />
+  <ErrorForm v-else-if="successMessage" :text="successMessage" />
   <div class="verify-container">
     <LogoHeader />
     <div class="verify-content">
@@ -18,12 +20,6 @@
       <router-link to="/chat" :class="{ disabled: !!errorMessage }">
         <AppButton class="verify-btn" text="Перейти в приложение" />
       </router-link>
-      <small class="verify-error" v-if="errorMessage"
-        >{{ errorMessage }}
-      </small>
-      <small class="verify-message" v-else-if="successMessage"
-        >{{ successMessage }}
-      </small>
     </div>
   </div>
 </template>
@@ -31,10 +27,13 @@
 <script setup lang="ts">
 import LogoHeader from '@/components/ui/LogoHeader.vue'
 import AppButton from '@/components/AppButton.vue'
+import ErrorForm from '@/components/ui/ErrorForm.vue'
 import { ref } from 'vue'
 import { useRouter, useRoute } from 'vue-router'
 import { auth } from '@/firebaseConfig'
 import { onAuthStateChanged, applyActionCode } from 'firebase/auth'
+import { useErrorHandler } from '@/composables/useErrorHanler'
+import { useTimeoutError } from '@/composables/useTimeoutError'
 
 const router = useRouter()
 const route = useRoute()
@@ -55,11 +54,11 @@ const checkEmail = async () => {
   } catch (error) {
     errorMessage.value =
       'Произошла ошибка при обновлении статуса пользователя. Пожалуйста, попробуйте войти вручную.'
+    useTimeoutError(errorMessage, 5000)
   }
 }
 
 const rawOobCode = route.query.oobCode
-
 let oobCode: string | null = null
 
 if (typeof rawOobCode === 'string' && rawOobCode.length > 0) {
@@ -72,42 +71,26 @@ if (typeof rawOobCode === 'string' && rawOobCode.length > 0) {
   oobCode = rawOobCode[0]
 }
 
-if (!oobCode) {
+if (oobCode) {
+  try {
+    await applyActionCode(auth, oobCode)
+    await checkEmail()
+  } catch (e) {
+    const error = e as { code?: string }
+    errorMessage.value = useErrorHandler(error.code, 'verify')
+    useTimeoutError(errorMessage, 5000)
+  }
+} else {
   errorMessage.value =
     'Недействительная или отсутствующая ссылка для подтверждения email.'
-} else {
-  applyActionCode(auth, oobCode)
-    .then(() => checkEmail())
-    .catch((error) => {
-      switch (error.code) {
-        case 'auth/expired-action-code':
-          errorMessage.value =
-            'Срок действия ссылки для подтверждения истек. Пожалуйста, запросите письмо для подтверждения снова.'
-          break
-        case 'auth/invalid-action-code':
-          errorMessage.value =
-            'Ссылка для подтверждения недействительна или уже была использована.'
-          break
-        case 'auth/user-disabled':
-          errorMessage.value =
-            'Ваша учетная запись была отключена. Пожалуйста, свяжитесь с поддержкой.'
-          break
-        case 'auth/user-not-found':
-          errorMessage.value =
-            'Не удалось найти пользователя, связанного с этой ссылкой. Возможно, учетная запись была удалена.'
-          break
-        default:
-          errorMessage.value =
-            'Произошла непредвиденная ошибка при подтверждении email. Пожалуйста, попробуйте еще раз.'
-          break
-      }
-    })
+  useTimeoutError(errorMessage, 5000)
 }
 
 onAuthStateChanged(auth, (user) => {
   if (user && user.emailVerified) {
     emailVerified.value = true
     successMessage.value = 'Email подтвержден'
+    useTimeoutError(successMessage, 5000)
     router.push('/chat')
   }
 })
@@ -120,8 +103,7 @@ onAuthStateChanged(auth, (user) => {
   align-items: center;
   width: 30%;
   padding: 20px;
-  margin-bottom: 50px;
-  border: 1px solid #71717a;
+  border: 1px solid var(--btn-color);
   box-shadow: 0 0 10px rgba(0, 0, 0, 0.3);
   border-radius: 10px;
 }
@@ -131,7 +113,7 @@ onAuthStateChanged(auth, (user) => {
   margin-bottom: 20px;
   font-size: 10px;
   font-weight: 300;
-  color: #71717a;
+  color: var(--btn-color);
 }
 
 .verify-text {
@@ -149,7 +131,7 @@ onAuthStateChanged(auth, (user) => {
 .verify-error,
 .verify-message {
   font-size: 10px;
-  color: rgb(240, 85, 85);
+  color: var(--error-color);
 }
 
 .disabled {

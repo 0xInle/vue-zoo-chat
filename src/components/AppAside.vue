@@ -90,7 +90,7 @@ onBeforeUnmount(() => {
   height: calc(100vh - 40px);
   padding: 10px;
   margin: 20px 0;
-  background-color: #404045;
+  background-color: var(--bg-color);
   box-shadow: 0 0 10px rgba(0, 0, 0, 0.3);
   border-radius: 10px;
   border-bottom-left-radius: 0;
@@ -136,7 +136,7 @@ onBeforeUnmount(() => {
   text-align: left;
   box-shadow: 0 0 10px rgba(0, 0, 0, 0.3);
   border-radius: 10px;
-  color: #fff;
+  color: var(--text-color);
   font-size: 14px;
   transition: all 0.2s ease-in-out;
 }

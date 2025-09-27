@@ -1,3 +1,12 @@
+:root {
+  --text-color: #fff;
+  --dark-color: #000;
+  --error-color: rgb(240, 85, 85);
+  --bg-color: #404045;
+  --bg-page-color: #292a2d;
+  --btn-color: #71717a;
+}
+
 *,
 *::before,
 *::after {
@@ -7,7 +16,7 @@
 
 body {
   font-family: Roboto, sans-serif;
-  background-color: #292a2d;
+  background-color: var(--bg-page-color);
   overflow-y: auto;
 }
 
@@ -45,7 +54,7 @@ html {
 .link-reset {
   font-size: 18px;
   text-decoration: none;
-  color: #000;
+  color: var(--dark-color);
 }
 
 .flex {

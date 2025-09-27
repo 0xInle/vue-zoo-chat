@@ -47,7 +47,7 @@ function regenerateReplay(text: string) {
 }
 
 .app-icon-btn {
-  color: #fff;
+  color: var(--text-color);
 }
 
 .app-icon-btn:not(:last-child) {

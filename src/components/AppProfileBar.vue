@@ -128,7 +128,7 @@ onBeforeUnmount(() => {
   margin-right: 10px;
   border-radius: 10px;
   font-size: 14px;
-  color: #fff;
+  color: var(--text-color);
   line-height: 1;
 }
 
@@ -156,7 +156,7 @@ onBeforeUnmount(() => {
   max-width: 200px;
   padding: 10px;
   margin: 20px 0;
-  background-color: #404045;
+  background-color: var(--bg-color);
   box-shadow: 0 0 10px rgba(0, 0, 0, 0.3);
   border-radius: 10px;
 }
@@ -174,14 +174,14 @@ onBeforeUnmount(() => {
   padding: 10px;
   box-shadow: 0 0 10px rgba(0, 0, 0, 0.3);
   border-radius: 10px;
-  color: #fff;
+  color: var(--text-color);
   font-size: 14px;
   transition: all 0.2s ease-in-out;
   background-color: transparent;
 }
 
 .profile-btn-action:hover {
-  color: #fff;
+  color: var(--text-color);
   background-color: transparent;
   box-shadow: 0 0 10px rgba(255, 255, 255, 0.3);
 }
@@ -191,7 +191,7 @@ onBeforeUnmount(() => {
 }
 
 .profile-btn-action:focus {
-  color: #fff;
+  color: var(--text-color);
   background-color: transparent;
   box-shadow: 0 0 10px rgba(255, 255, 255, 0.3);
 }
@@ -206,7 +206,7 @@ onBeforeUnmount(() => {
 
 .profile-controls {
   padding: 10px;
-  background-color: #71717a;
+  background-color: var(--btn-color);
   box-shadow: 0 0 10px rgba(0, 0, 0, 0.3);
   border-radius: 10px;
 }
@@ -215,7 +215,7 @@ onBeforeUnmount(() => {
   outline: none;
   width: 16px;
   height: 16px;
-  color: #fff;
+  color: var(--text-color);
   transition: all 0.2s ease-in-out;
 }
 
@@ -228,13 +228,13 @@ onBeforeUnmount(() => {
 }
 
 .profile-btn:hover svg {
-  color: #292a2d;
+  color: var(--bg-page-color);
   transform: scale(1.1);
   transition: all 0.2s ease-in-out;
 }
 
 .profile-btn:focus svg {
-  color: #292a2d;
+  color: var(--bg-page-color);
   transform: scale(1.1);
   transition: all 0.2s ease-in-out;
 }

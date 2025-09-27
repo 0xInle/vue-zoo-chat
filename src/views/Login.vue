@@ -1,4 +1,6 @@
 <template>
+  <ErrorForm v-if="loginError" :text="loginError" />
+  <ErrorForm v-else-if="googleError" :text="googleError" />
   <div class="login-container">
     <LogoHeader />
     <div class="login-subtitle">Используйте свой email адрес для входа.</div>
@@ -15,9 +17,6 @@
             autocomplete="off"
           />
         </div>
-        <small class="login-input-error" v-if="eError && eEmail">{{
-          eError
-        }}</small>
       </div>
       <div class="login-form-content-mb">
         <div
@@ -46,14 +45,8 @@
           text="Войти"
           class="login-btn"
           type="submit"
-          :disabled="isSubmitting || isToManyAttempts || !isFormValid"
+          :disabled="!isFormValid || isLoading"
         />
-        <small class="login-button-error" v-if="isToManyAttempts">
-          Слишком частые попытки входа в систему
-        </small>
-        <small class="login-button-error" v-if="firebaseLoginError">
-          {{ firebaseLoginError }}
-        </small>
       </div>
       <div class="login-help flex">
         <router-link to="/forgot" class="login-help-link link-reset">
@@ -69,13 +62,14 @@
         <div class="login-or-right"></div>
       </div>
     </form>
-    <button class="login-btn-google btn-reset" @click="signInWithGoogle">
+    <button
+      class="login-btn-google btn-reset"
+      @click="signInWithGoogle"
+      :disabled="isLoadingGoogle"
+    >
       <IconGoogle class="login-btn-icon" />
       Войти используя Google
     </button>
-    <small class="login-button-error" v-if="firebaseError">
-      {{ firebaseError }}
-    </small>
   </div>
 </template>
 
@@ -86,7 +80,8 @@ import IconGoogle from '@/assets/icons/icon-google.svg'
 import AppButton from '@/components/AppButton.vue'
 import LogoHeader from '@/components/ui/LogoHeader.vue'
 import ViewPasswordButton from '@/components/ui/ViewPasswordButton.vue'
-import { computed, watch, ref } from 'vue'
+import ErrorForm from '@/components/ui/ErrorForm.vue'
+import { computed, ref } from 'vue'
 import { auth } from '@/firebaseConfig'
 import {
   signInWithEmailAndPassword,
@@ -95,36 +90,34 @@ import {
 } from 'firebase/auth'
 import { useRouter } from 'vue-router'
 import { useValidateForm } from '@/composables/useValidateForm'
+import { useErrorHandler } from '@/composables/useErrorHanler'
+import { useTimeoutError } from '@/composables/useTimeoutError'
 
+const { eError, eEmail, pError, pPassword } = useValidateForm()
 const viewPassword = ref(false)
-
-const {
-  eError,
-  eEmail,
-  pError,
-  pPassword,
-  handleSubmit,
-  submitCount,
-  isSubmitting,
-} = useValidateForm()
-
 const router = useRouter()
 const userName = ref()
 const userAvatar = ref()
+const googleError = ref('')
+const loginError = ref()
+const isLoading = ref(false)
+const isLoadingGoogle = ref(false)
 
 const isFormValid = computed(() => {
   return !eError.value && !!eEmail.value && !pError.value && !!pPassword.value
 })
 
-const firebaseError = ref('')
-
 async function signInWithGoogle() {
+  googleError.value = ''
+
   if (auth.currentUser) {
     userName.value = auth.currentUser.displayName
     userAvatar.value = auth.currentUser.photoURL
     router.push('/chat')
     return
   }
+
+  isLoadingGoogle.value = true
 
   const provider = new GoogleAuthProvider()
   try {
@@ -138,108 +131,45 @@ async function signInWithGoogle() {
     router.push('/chat')
   } catch (e) {
     const error = e as { code?: string }
-    switch (error.code) {
-      case 'auth/popup-closed-by-user':
-        firebaseError.value =
-          'Вы закрыли окно входа. Пожалуйста, попробуйте еще раз.'
-        break
-      case 'auth/cancelled-popup-request':
-        firebaseError.value =
-          'Пожалуйста, не пытайтесь открыть несколько окон входа одновременно. Подождите завершения текущего процесса.'
-        break
-      case 'auth/account-exists-with-different-credential':
-        firebaseError.value =
-          'У вас уже есть аккаунт, зарегистрированный с другим способом входа. Пожалуйста, войдите, используя свой оригинальный способ.'
-        break
-      case 'auth/popup-blocked':
-        firebaseError.value =
-          'Всплывающее окно было заблокировано вашим браузером. Пожалуйста, разрешите всплывающие окна для этого сайта и попробуйте снова.'
-        break
-      case 'auth/network-request-failed':
-        firebaseError.value =
-          'Ошибка сети. Проверьте ваше интернет-соединение и попробуйте снова.'
-        break
-      case 'auth/user-disabled':
-        firebaseError.value =
-          'Ваша учетная запись была отключена. Пожалуйста, свяжитесь с поддержкой.'
-        break
-      case 'auth/too-many-requests':
-        firebaseError.value =
-          'Слишком много попыток входа. Пожалуйста, попробуйте снова через некоторое время.'
-        break
-      default:
-        firebaseError.value =
-          'Произошла непредвиденная ошибка при входе. Пожалуйста, попробуйте снова или обратитесь в службу поддержки.'
+    googleError.value = useErrorHandler(error.code, 'login')
+
+    if (googleError.value) {
+      useTimeoutError(googleError, 5000)
     }
+  } finally {
+    isLoadingGoogle.value = false
   }
 }
 
-const firebaseLoginError = ref()
-let errorTimeoutId: number | null = null
-
-const onSubmit = handleSubmit(async (values) => {
-  firebaseLoginError.value = ''
-  if (errorTimeoutId) {
-    clearTimeout(errorTimeoutId)
-    errorTimeoutId = null
-  }
+const onSubmit = async () => {
+  loginError.value = ''
+  isLoading.value = true
 
   try {
-    await signInWithEmailAndPassword(auth, values.email, values.password)
+    await signInWithEmailAndPassword(
+      auth,
+      eEmail.value as string,
+      pPassword.value as string
+    )
   } catch (e) {
+    console.log(e)
     const error = e as { code?: string }
-    switch (error.code) {
-      case 'auth/user-not-found':
-      case 'auth/wrong-password':
-      case 'auth/invalid-credential':
-        firebaseLoginError.value =
-          'Неверный адрес электронной почты или пароль.'
-        break
-      case 'auth/invalid-email':
-        firebaseLoginError.value = 'Неверный формат электронной почты.'
-        break
-      case 'auth/user-disabled':
-        firebaseLoginError.value =
-          'Ваша учетная запись была отключена. Пожалуйста, свяжитесь с поддержкой.'
-        break
-      case 'auth/operation-not-allowed':
-        firebaseLoginError.value =
-          'Вход по почте и паролю временно недоступен. Пожалуйста, свяжитесь с поддержкой.'
-        break
-      case 'auth/network-request-failed':
-        firebaseLoginError.value =
-          'Проблемы с подключением к сети. Пожалуйста, проверьте интернет-соединение.'
-        break
-      default:
-        firebaseLoginError.value =
-          'Произошла непредвиденная ошибка при входе. Пожалуйста, попробуйте еще раз.'
-        break
+    loginError.value = useErrorHandler(error.code, 'google')
+
+    if (loginError.value) {
+      useTimeoutError(loginError, 5000)
     }
-
-    if (firebaseLoginError.value) {
-      errorTimeoutId = setTimeout(() => {
-        firebaseLoginError.value = ''
-        errorTimeoutId = null
-      }, 3000)
-    }
+  } finally {
+    isLoading.value = false
   }
-})
-
-const isToManyAttempts = computed(() => submitCount.value >= 3)
-
-watch(isToManyAttempts, (val) => {
-  if (val) {
-    setTimeout(() => (submitCount.value = 0), 2000)
-  }
-})
+}
 </script>
 
 <style scoped>
 .login-container {
   width: 30%;
   padding: 20px;
-  margin-bottom: 50px;
-  border: 1px solid #71717a;
+  border: 1px solid var(--btn-color);
   box-shadow: 0 0 10px rgba(0, 0, 0, 0.3);
   border-radius: 10px;
 }
@@ -249,10 +179,11 @@ watch(isToManyAttempts, (val) => {
   text-align: center;
   font-size: 10px;
   font-weight: 300;
-  color: #71717a;
+  color: var(--btn-color);
 }
 
 .login-form-content-mb {
+  position: relative;
   margin-bottom: 20px;
 }
 
@@ -261,13 +192,14 @@ watch(isToManyAttempts, (val) => {
   align-items: center;
   padding-left: 10px;
   padding-right: 10px;
-  border: 1px solid #71717a;
+  border: 1px solid var(--btn-color);
   border-radius: 10px;
   box-shadow: 0 0 10px rgba(0, 0, 0, 0.3);
+  transition: all 0.2s ease-in-out;
 }
 
 .login-input-icon {
-  color: #fff;
+  color: var(--text-color);
 }
 
 .login-input {
@@ -277,12 +209,8 @@ watch(isToManyAttempts, (val) => {
   background-color: transparent;
   border: none;
   font-size: 14px;
-  color: #fff;
+  color: var(--text-color);
 }
-
-/* .login-input:not(:last-child) {
-  margin-bottom: 10px;
-} */
 
 .login-btn {
   width: 100%;
@@ -296,21 +224,21 @@ watch(isToManyAttempts, (val) => {
 
 .login-help-link {
   outline: none;
-  color: #71717a;
+  color: var(--btn-color);
   font-size: 10px;
   transition: all 0.2s ease-in-out;
 }
 
 .login-help-link:hover {
-  color: #fff;
+  color: var(--text-color);
 }
 
 .login-help-link:focus {
-  color: #fff;
+  color: var(--text-color);
 }
 
 .login-help-link:active {
-  color: #fff;
+  color: var(--text-color);
 }
 
 .login-or {
@@ -322,18 +250,18 @@ watch(isToManyAttempts, (val) => {
 .login-or-right {
   width: 100%;
   height: 1px;
-  background-color: #71717a;
+  background-color: var(--btn-color);
 }
 
 .login-or-center {
   padding: 0 10px;
-  color: #fff;
+  color: var(--text-color);
   font-size: 10px;
 }
 
 .login-btn-icon {
   margin-right: 10px;
-  fill: #fff;
+  fill: var(--text-color);
   transition: all 0.2s ease-in-out;
 }
 
@@ -346,49 +274,45 @@ watch(isToManyAttempts, (val) => {
   padding: 10px;
   box-shadow: 0 0 10px rgba(0, 0, 0, 0.3);
   border-radius: 10px;
-  color: #fff;
+  color: var(--text-color);
   font-size: 14px;
   transition: all 0.2s ease-in-out;
-  background-color: #71717a;
+  background-color: var(--btn-color);
 }
 
 .login-btn-google:hover {
-  background-color: #fff;
-  color: #000;
+  background-color: var(--text-color);
+  color: var(--dark-color);
 }
 
 .login-btn-google:focus {
-  background-color: #fff;
-  color: #000;
+  background-color: var(--text-color);
+  color: var(--dark-color);
 }
 
 .login-btn-google:hover .login-btn-icon {
-  fill: #000;
+  fill: var(--dark-color);
 }
 
 .login-btn-google:focus .login-btn-icon {
-  fill: #000;
+  fill: var(--dark-color);
 }
 
 .login-btn-google:active .login-btn-icon {
-  fill: #000;
+  fill: var(--dark-color);
 }
 
 .login-btn-google:active {
-  background-color: #fff;
-  color: #000;
-}
-
-.login-input-error {
-  font-size: 10px;
-  color: rgb(240, 85, 85);
+  background-color: var(--text-color);
+  color: var(--dark-color);
 }
 
 .invalid {
-  border-color: rgb(240, 85, 85);
+  border-color: var(--error-color);
 }
 
-.login-btn:disabled {
+.login-btn:disabled,
+.login-btn-google:disabled {
   pointer-events: none;
   opacity: 0.3;
 }
@@ -399,8 +323,10 @@ watch(isToManyAttempts, (val) => {
   margin-bottom: 20px;
 }
 
-.login-button-error {
+.login-input-error {
+  position: absolute;
+  bottom: -15px;
   font-size: 10px;
-  color: rgb(240, 85, 85);
+  color: var(--error-color);
 }
 </style>

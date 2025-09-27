@@ -15,14 +15,14 @@
 .app-title {
   margin: 0;
   margin-bottom: 30px;
-  color: #fff;
+  color: var(--text-color);
   font-size: 24px;
   font-weight: 400;
 }
 
 .app-subtitle {
   margin: 0;
-  color: #fff;
+  color: var(--text-color);
   font-size: 14px;
   font-weight: 400;
 }

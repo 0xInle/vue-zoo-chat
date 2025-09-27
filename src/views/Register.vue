@@ -1,4 +1,5 @@
 <template>
+  <ErrorForm :text="firebaseError" />
   <div class="register-container">
     <LogoHeader />
     <div class="register-reset-content">
@@ -21,9 +22,6 @@
             autocomplete="off"
           />
         </div>
-        <small class="register-input-error" v-if="eError && eEmail">{{
-          eError
-        }}</small>
       </div>
       <div class="register-form-content-mb">
         <div
@@ -82,7 +80,7 @@
         text="Зарегистрироваться"
         class="register-btn-continue"
         type="submit"
-        :disabled="isSubmitting || !isFormValid || !!confirmError"
+        :disabled="isSubmitting || !isFormValid || !!confirmError || isLoading"
       />
       <small class="register-input-error" v-if="firebaseError">
         {{ firebaseError }}
@@ -99,6 +97,8 @@ import IconMail from '../assets/icons/icon-mail.svg'
 import IconPassword from '../assets/icons/icon-password.svg'
 import AppButton from '@/components/AppButton.vue'
 import LogoHeader from '@/components/ui/LogoHeader.vue'
+import ErrorForm from '@/components/ui/ErrorForm.vue'
+import ViewPasswordButton from '@/components/ui/ViewPasswordButton.vue'
 import { ref, computed } from 'vue'
 import { auth } from '@/firebaseConfig'
 import {
@@ -107,10 +107,8 @@ import {
 } from 'firebase/auth'
 import { useRouter } from 'vue-router'
 import { useValidateForm } from '@/composables/useValidateForm'
-import ViewPasswordButton from '@/components/ui/ViewPasswordButton.vue'
-
-const viewPassword = ref(false)
-const viewConfirmPassword = ref(false)
+import { useErrorHandler } from '@/composables/useErrorHanler'
+import { useTimeoutError } from '@/composables/useTimeoutError'
 
 const {
   eError,
@@ -123,13 +121,18 @@ const {
   cError,
   confirmError,
 } = useValidateForm()
-
+const viewPassword = ref(false)
+const viewConfirmPassword = ref(false)
 const router = useRouter()
-
 const firebaseError = ref('')
+const isLoading = ref(false)
 
 const formSubmit = handleSubmit(async function registerWithEmail(values) {
   const { email, password } = values
+
+  firebaseError.value = ''
+  isLoading.value = true
+
   if (!confirmError.value)
     try {
       const userCredential = await createUserWithEmailAndPassword(
@@ -137,38 +140,22 @@ const formSubmit = handleSubmit(async function registerWithEmail(values) {
         email,
         password
       )
-      console.log('Пользователь зарегистрирован:', userCredential.user)
       const actionCodeSettings = {
         url: 'http://localhost:5173/verify',
         handleCodeInApp: true,
       }
       await sendEmailVerification(userCredential.user, actionCodeSettings)
 
-      console.log('Письмо для верификации отправлено!')
-
       router.push('/verify')
     } catch (e) {
       const error = e as { code?: string }
-      switch (error.code) {
-        case 'auth/email-already-in-use':
-          firebaseError.value =
-            'Этот адрес электронной почты уже используется. Пожалуйста, войдите или используйте другой email.'
-          break
-        case 'auth/invalid-email':
-          firebaseError.value = 'Неверный формат электронной почты.'
-          break
-        case 'auth/weak-password':
-          firebaseError.value =
-            'Пароль слишком слабый. Пожалуйста, используйте более надежный пароль.'
-          break
-        case 'auth/operation-not-allowed':
-          firebaseError.value =
-            'Регистрация по почте и паролю временно недоступна. Пожалуйста, свяжитесь с поддержкой.'
-          break
-        default:
-          firebaseError.value =
-            'Произошла непредвиденная ошибка при регистрации. Пожалуйста, попробуйте еще раз.'
+      firebaseError.value = useErrorHandler(error.code, 'register')
+
+      if (firebaseError.value) {
+        useTimeoutError(firebaseError, 5000)
       }
+    } finally {
+      isLoading.value = false
     }
 })
 
@@ -191,8 +178,7 @@ const isFormValid = computed(() => {
   align-items: center;
   width: 30%;
   padding: 20px;
-  margin-bottom: 50px;
-  border: 1px solid #71717a;
+  border: 1px solid var(--btn-color);
   box-shadow: 0 0 10px rgba(0, 0, 0, 0.3);
   border-radius: 10px;
 }
@@ -213,7 +199,7 @@ const isFormValid = computed(() => {
 .register-logo-title {
   font-size: 36px;
   font-weight: 900;
-  color: #fff;
+  color: var(--text-color);
   line-height: 1;
 }
 
@@ -228,7 +214,7 @@ const isFormValid = computed(() => {
   text-align: center;
   font-size: 10px;
   font-weight: 300;
-  color: #71717a;
+  color: var(--btn-color);
 }
 
 .register-form {
@@ -238,6 +224,7 @@ const isFormValid = computed(() => {
 
 .register-form-content-mb {
   margin-bottom: 20px;
+  position: relative;
 }
 
 .register-input-container {
@@ -245,13 +232,14 @@ const isFormValid = computed(() => {
   align-items: center;
   padding-left: 10px;
   padding-right: 10px;
-  border: 1px solid #71717a;
+  border: 1px solid var(--btn-color);
   border-radius: 10px;
   box-shadow: 0 0 10px rgba(0, 0, 0, 0.3);
+  transition: all 0.2s ease-in-out;
 }
 
 .register-input-icon {
-  color: #fff;
+  color: var(--text-color);
 }
 
 .register-input {
@@ -261,7 +249,7 @@ const isFormValid = computed(() => {
   background-color: transparent;
   border: none;
   font-size: 14px;
-  color: #fff;
+  color: var(--text-color);
 }
 
 .register-btn-code {
@@ -275,30 +263,32 @@ const isFormValid = computed(() => {
 .register-back-link {
   text-align: center;
   outline: none;
-  color: #71717a;
+  color: var(--btn-color);
   font-size: 10px;
   transition: all 0.2s ease-in-out;
 }
 
 .register-back-link:hover {
-  color: #fff;
+  color: var(--text-color);
 }
 
 .register-back-link:focus {
-  color: #fff;
+  color: var(--text-color);
 }
 
 .register-back-link:active {
-  color: #fff;
+  color: var(--text-color);
 }
 
 .register-input-error {
+  position: absolute;
+  bottom: -15px;
   font-size: 10px;
-  color: rgb(240, 85, 85);
+  color: var(--error-color);
 }
 
 .invalid {
-  border-color: rgb(240, 85, 85);
+  border-color: var(--error-color);
 }
 
 .register-btn-continue:disabled {
