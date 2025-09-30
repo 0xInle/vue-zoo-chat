@@ -96,18 +96,13 @@ function handleEnter(event: KeyboardEvent): void {
 
 onMounted(() => {
   textarea.value?.focus()
-  // const localHistory = localStorage.removeItem('messageHistory')
+
   const localHistory = localStorage.getItem('messageHistory')
   if (localHistory) {
     answersStore.answer = JSON.parse(localHistory)
 
-    const keys = Object.keys(answersStore.answer)
-    const lastNumber =
-      keys
-        .map((k) => parseInt(k.replace('Chat', ''), 10))
-        .filter((n) => !isNaN(n))
-        .sort((a, b) => b - a)[0] || 0
-    answersStore.chatCounter = lastNumber
+    const length = Object.keys(answersStore.answer).length
+    answersStore.chatCounter = length
   }
 
   answersStore.currentChatId = null

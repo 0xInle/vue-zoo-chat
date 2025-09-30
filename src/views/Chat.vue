@@ -2,7 +2,12 @@
   <AppLogoBar @showAside="showAside" v-if="!isVisible" />
   <AppAside v-model:isVisible="isVisible" />
   <main class="main">
-    <AppMessageList v-if="answersStore.currentChatId" />
+    <AppMessageList
+      v-if="
+        answersStore.currentChatId &&
+        answersStore.answer[answersStore.currentChatId]
+      "
+    />
     <AppWelcomeContent v-else />
     <AppMessageForm />
   </main>

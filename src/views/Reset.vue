@@ -83,7 +83,7 @@ import { auth } from '@/firebaseConfig'
 import { confirmPasswordReset } from 'firebase/auth'
 import { ref, watch, computed } from 'vue'
 import { useValidateForm } from '@/composables/useValidateForm'
-import { useErrorHandler } from '@/composables/useErrorHanler'
+import { useErrorHandler } from '@/composables/useErrorHandler'
 import { useTimeoutError } from '@/composables/useTimeoutError'
 import { useTimeoutFn } from '@vueuse/core'
 

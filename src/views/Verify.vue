@@ -32,7 +32,7 @@ import { ref } from 'vue'
 import { useRouter, useRoute } from 'vue-router'
 import { auth } from '@/firebaseConfig'
 import { onAuthStateChanged, applyActionCode } from 'firebase/auth'
-import { useErrorHandler } from '@/composables/useErrorHanler'
+import { useErrorHandler } from '@/composables/useErrorHandler'
 import { useTimeoutError } from '@/composables/useTimeoutError'
 
 const router = useRouter()

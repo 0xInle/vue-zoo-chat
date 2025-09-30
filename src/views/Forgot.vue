@@ -48,7 +48,7 @@ import { sendPasswordResetEmail } from 'firebase/auth'
 import { auth } from '@/firebaseConfig'
 import { ref } from 'vue'
 import { useValidateForm } from '@/composables/useValidateForm'
-import { useErrorHandler } from '@/composables/useErrorHanler'
+import { useErrorHandler } from '@/composables/useErrorHandler'
 import { useTimeoutError } from '@/composables/useTimeoutError'
 
 const isSuccess = ref(false)

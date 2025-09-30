@@ -30,10 +30,20 @@ export const useAnswersStore = defineStore('answersStore', () => {
     return keys.length ? answer.value[keys[keys.length - 1]] : null
   }
 
+  function clearHistory() {
+    Object.keys(answer.value).forEach((key: string) => {
+      delete answer.value[key]
+    })
+    currentChatId.value = null
+    chatCounter.value = 0
+    localStorage.removeItem('messageHistory')
+  }
+
   return {
     answer,
     addChat,
     getLastChat,
+    clearHistory,
     currentChatId,
     focusTextarea,
     chatCounter,

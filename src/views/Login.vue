@@ -90,7 +90,7 @@ import {
 } from 'firebase/auth'
 import { useRouter } from 'vue-router'
 import { useValidateForm } from '@/composables/useValidateForm'
-import { useErrorHandler } from '@/composables/useErrorHanler'
+import { useErrorHandler } from '@/composables/useErrorHandler'
 import { useTimeoutError } from '@/composables/useTimeoutError'
 
 const { eError, eEmail, pError, pPassword } = useValidateForm()
@@ -151,6 +151,9 @@ const onSubmit = async () => {
       eEmail.value as string,
       pPassword.value as string
     )
+    if (eEmail.value) {
+      router.push('/chat')
+    }
   } catch (e) {
     console.log(e)
     const error = e as { code?: string }

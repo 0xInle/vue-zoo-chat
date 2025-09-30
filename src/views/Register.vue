@@ -107,7 +107,7 @@ import {
 } from 'firebase/auth'
 import { useRouter } from 'vue-router'
 import { useValidateForm } from '@/composables/useValidateForm'
-import { useErrorHandler } from '@/composables/useErrorHanler'
+import { useErrorHandler } from '@/composables/useErrorHandler'
 import { useTimeoutError } from '@/composables/useTimeoutError'
 
 const {

@@ -8,16 +8,28 @@
         {{ userName }}
       </div>
       <Transition name="dropdown">
-        <div class="profile-dropdown" v-if="isOpen" ref="target" tabindex="0">
+        <div
+          class="profile-dropdown"
+          v-if="isOpen"
+          @keydown.esc="isOpen = false"
+          ref="target"
+          tabindex="0"
+        >
           <ul class="profile-list list-reset">
             <li class="profile-item">
-              <button class="profile-btn-action btn-reset">
+              <button
+                class="profile-btn-action btn-reset"
+                @click="openModal('history')"
+              >
                 <IconDatabase class="profile-btn-icon" />
                 Очистить историю
               </button>
             </li>
             <li class="profile-item">
-              <button class="profile-btn-action btn-reset">
+              <button
+                class="profile-btn-action btn-reset"
+                @click="openModal('contacts')"
+              >
                 <IconContact class="profile-btn-icon" />
                 Контакты
               </button>
@@ -47,6 +59,33 @@
         <IconSun class="profile-icon" />
       </button>
     </div>
+    <teleport to="body">
+      <Transition
+        name="fade"
+        @after-enter="useHistoryModal.onEnter"
+        @after-leave="useHistoryModal.onLeave"
+      >
+        <ModalClearHistory
+          v-if="historyModal"
+          ref="historyModalRef"
+          :isOpenClearHistiry="historyModal"
+          @closeModal="closeModal('history')"
+          @keydown.esc="historyModal = false"
+        />
+      </Transition>
+      <Transition
+        name="fade"
+        @after-enter="useContactsModal.onEnter"
+        @after-leave="useContactsModal.onLeave"
+      >
+        <ModalContacts
+          v-if="contactsModal"
+          ref="contactsModalRef"
+          @closeContactsModal="closeModal('contacts')"
+          @keydown.esc="contactsModal = false"
+        />
+      </Transition>
+    </teleport>
   </div>
 </template>
 
@@ -64,14 +103,37 @@ import {
   nextTick,
   inject,
   type Ref,
+  Teleport,
 } from 'vue'
 import { onClickOutside } from '@vueuse/core'
 import { auth } from '@/firebaseConfig'
 import { useRouter } from 'vue-router'
+import ModalClearHistory from './ui/ModalClearHistory.vue'
+import ModalContacts from './ui/ModalContacts.vue'
+import { useModalFocus } from '@/composables/useModalFocus'
 
 const userName = inject('userName') as Ref<string | null>
 const userAvatar = inject('userAvatar') as Ref<string | null>
 const router = useRouter()
+const historyModal = ref(false)
+const contactsModal = ref(false)
+const contactsModalRef = ref()
+const historyModalRef = ref()
+const useContactsModal = useModalFocus(contactsModalRef)
+const useHistoryModal = useModalFocus(historyModalRef)
+const modals = {
+  history: historyModal,
+  contacts: contactsModal,
+}
+
+function openModal(type: keyof typeof modals) {
+  modals[type].value = true
+  isOpen.value = false
+}
+
+function closeModal(type: keyof typeof modals) {
+  modals[type].value = false
+}
 
 function logoutUser() {
   auth.signOut()
@@ -95,20 +157,6 @@ function toggleDropdown() {
 
 onClickOutside(target, () => {
   isOpen.value = false
-})
-
-function handleEscape(event: KeyboardEvent) {
-  if (event.key === 'Escape' && isOpen.value) {
-    isOpen.value = false
-  }
-}
-
-onMounted(() => {
-  document.addEventListener('keydown', handleEscape)
-})
-
-onBeforeUnmount(() => {
-  document.removeEventListener('keydown', handleEscape)
 })
 </script>
 
@@ -251,5 +299,20 @@ onBeforeUnmount(() => {
 .dropdown-enter-active,
 .dropdown-leave-active {
   transition: all 0.2s ease;
+}
+
+.fade-enter-active,
+.fade-leave-active {
+  transition: opacity 0.2s ease-in-out;
+}
+
+.fade-enter-from,
+.fade-leave-to {
+  opacity: 0;
+}
+
+.fade-enter-to,
+.fade-leave-from {
+  opacity: 1;
 }
 </style>
