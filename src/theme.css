@@ -5,6 +5,26 @@
   --bg-color: #404045;
   --bg-page-color: #292a2d;
   --btn-color: #71717a;
+  --icon-color: #fff;
+  --form-color: #404045;
+  --contacts-text-color: #71717a;
+  --contacts-text-color-hover: #fff;
+  --box-shadow-color: 0 0 0;
+  --box-shadow-hover-color: 255 255 255;
+}
+
+.light {
+  --text-color: #1a1a1a;
+  --dark-color: #000;
+  --error-color: rgb(240, 85, 85);
+  --bg-color: #000;
+  --bg-page-color: #fff;
+  --btn-color: #1a1a1a;
+  --form-color: #fff;
+  --contacts-text-color: #71717a;
+  --contacts-text-color-hover: #000;
+  --box-shadow-color: 0 0 0;
+  --box-shadow-hover-color: 0 0 0;
 }
 
 *,

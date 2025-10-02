@@ -55,8 +55,12 @@
       >
         <IconDot class="profile-icon profile-icon-dot" />
       </button>
-      <button class="profile-btn profile-btn-theme btn-reset">
-        <IconSun class="profile-icon" />
+      <button
+        class="profile-btn profile-btn-theme btn-reset"
+        @click="toggleTheme"
+      >
+        <IconSun class="profile-icon" v-if="theme" />
+        <IconMoon class="profile-icon" v-else />
       </button>
     </div>
     <teleport to="body">
@@ -96,16 +100,8 @@ import IconDot from '@/assets/icons/icon-dot.svg'
 import IconContact from '@/assets/icons/icon-contact.svg'
 import IconDatabase from '@/assets/icons/icon-database.svg'
 import IconLogout from '@/assets/icons/icon-logout.svg'
-import {
-  ref,
-  onMounted,
-  onBeforeUnmount,
-  nextTick,
-  inject,
-  type Ref,
-  Teleport,
-} from 'vue'
-import { onClickOutside } from '@vueuse/core'
+import { ref, nextTick, inject, type Ref, Teleport } from 'vue'
+import { onClickOutside, useColorMode } from '@vueuse/core'
 import { auth } from '@/firebaseConfig'
 import { useRouter } from 'vue-router'
 import ModalClearHistory from './ui/ModalClearHistory.vue'
@@ -125,6 +121,10 @@ const modals = {
   history: historyModal,
   contacts: contactsModal,
 }
+const theme = ref(true)
+const mode = useColorMode()
+const isOpen = ref(false)
+const target = ref<HTMLElement | null>(null)
 
 function openModal(type: keyof typeof modals) {
   modals[type].value = true
@@ -142,9 +142,6 @@ function logoutUser() {
   router.push('/login')
 }
 
-const isOpen = ref(false)
-const target = ref<HTMLElement | null>(null)
-
 function toggleDropdown() {
   isOpen.value = !isOpen.value
 
@@ -158,6 +155,11 @@ function toggleDropdown() {
 onClickOutside(target, () => {
   isOpen.value = false
 })
+
+function toggleTheme() {
+  theme.value = !theme.value
+  mode.value = theme.value ? 'dark' : 'light'
+}
 </script>
 
 <style scoped>
@@ -204,7 +206,7 @@ onClickOutside(target, () => {
   max-width: 200px;
   padding: 10px;
   margin: 20px 0;
-  background-color: var(--bg-color);
+  background-color: var(--form-color);
   box-shadow: 0 0 10px rgba(0, 0, 0, 0.3);
   border-radius: 10px;
 }
@@ -220,7 +222,7 @@ onClickOutside(target, () => {
   outline: none;
   width: 100%;
   padding: 10px;
-  box-shadow: 0 0 10px rgba(0, 0, 0, 0.3);
+  box-shadow: 0 0 10px rgba(var(--box-shadow-color) / 0.3);
   border-radius: 10px;
   color: var(--text-color);
   font-size: 14px;
@@ -231,7 +233,7 @@ onClickOutside(target, () => {
 .profile-btn-action:hover {
   color: var(--text-color);
   background-color: transparent;
-  box-shadow: 0 0 10px rgba(255, 255, 255, 0.3);
+  box-shadow: 0 0 10px rgba(var(--box-shadow-hover-color) / 0.5);
 }
 
 .profile-btn-action--red:hover {
@@ -241,7 +243,7 @@ onClickOutside(target, () => {
 .profile-btn-action:focus {
   color: var(--text-color);
   background-color: transparent;
-  box-shadow: 0 0 10px rgba(255, 255, 255, 0.3);
+  box-shadow: 0 0 10px rgba(var(--box-shadow-hover-color) / 0.5);
 }
 
 .profile-btn-action--red:focus {
@@ -257,6 +259,10 @@ onClickOutside(target, () => {
   background-color: var(--btn-color);
   box-shadow: 0 0 10px rgba(0, 0, 0, 0.3);
   border-radius: 10px;
+}
+
+.profile-icon {
+  color: var(--icon-color);
 }
 
 .profile-btn {
@@ -298,7 +304,7 @@ onClickOutside(target, () => {
 
 .dropdown-enter-active,
 .dropdown-leave-active {
-  transition: all 0.2s ease;
+  transition: all 0.2s ease-in-out;
 }
 
 .fade-enter-active,

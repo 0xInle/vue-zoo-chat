@@ -85,16 +85,16 @@ function closeContactsModal() {
   outline: none;
   display: flex;
   align-items: center;
-  color: var(--btn-color);
+  color: var(--contacts-text-color);
   font-size: 14px;
   transition: all 0.2s ease-in-out;
 
   &:hover {
-    color: var(--text-color);
+    color: var(--contacts-text-color-hover);
   }
 
   &:focus {
-    color: var(--text-color);
+    color: var(--contacts-text-color-hover);
   }
 }
 

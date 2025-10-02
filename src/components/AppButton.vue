@@ -16,18 +16,18 @@ const { text } = defineProps<{ text: string }>()
   background-color: var(--btn-color);
   box-shadow: 0 0 10px rgba(0, 0, 0, 0.3);
   border-radius: 10px;
-  color: var(--text-color);
+  color: var(--icon-color);
   font-size: 14px;
   transition: all 0.2s ease-in-out;
 }
 
 .btn:hover {
-  background-color: var(--text-color);
+  background-color: var(--icon-color);
   color: var(--dark-color);
 }
 
 .btn:focus {
-  background-color: var(--text-color);
+  background-color: var(--icon-color);
   color: var(--dark-color);
 }
 </style>

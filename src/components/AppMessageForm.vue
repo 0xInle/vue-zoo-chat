@@ -128,7 +128,7 @@ watch(
 
 .form-wrapper {
   margin: 0 auto;
-  background-color: var(--bg-color);
+  background-color: var(--form-color);
   box-shadow: 0 0 10px rgba(0, 0, 0, 0.3);
   border-radius: 10px;
   padding: 10px 20px;

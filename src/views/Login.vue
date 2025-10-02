@@ -264,7 +264,7 @@ const onSubmit = async () => {
 
 .login-btn-icon {
   margin-right: 10px;
-  fill: var(--text-color);
+  fill: var(--icon-color);
   transition: all 0.2s ease-in-out;
 }
 
@@ -277,7 +277,7 @@ const onSubmit = async () => {
   padding: 10px;
   box-shadow: 0 0 10px rgba(0, 0, 0, 0.3);
   border-radius: 10px;
-  color: var(--text-color);
+  color: var(--icon-color);
   font-size: 14px;
   transition: all 0.2s ease-in-out;
   background-color: var(--btn-color);

@@ -101,6 +101,7 @@ watch(
   max-width: 50%;
   padding: 10px;
   max-width: fit-content;
+  color: var(--icon-color);
   background-color: var(--bg-color);
   border-radius: 10px;
 }
@@ -111,6 +112,7 @@ watch(
 
 .error-message {
   padding: 10px;
+  margin-bottom: 20px;
   border: 1px solid var(--error-color);
   border-radius: 10px;
   color: var(--error-color);

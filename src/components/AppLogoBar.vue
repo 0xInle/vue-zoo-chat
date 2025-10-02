@@ -1,8 +1,9 @@
 <template>
   <header class="logo">
     <div class="logo-title">
-      <img src="../../public/logo.png" alt="Логотип" />
+      <img :src="state === 'dark' ? lightLogo : darkLogo" alt="Логотип" />
     </div>
+
     <div class="logo-btn-bar">
       <button
         class="logo-btn btn-reset"
@@ -26,7 +27,11 @@
 import IconSidebar from '@/assets/icons/icon-sidebar.svg'
 import IconNewChat from '@/assets/icons/icon-new-chat.svg'
 import { useAnswersStore } from '@/stores/AnswersStore'
+import { useColorMode } from '@vueuse/core'
 
+const { state } = useColorMode()
+const lightLogo = '../../public/logo.png'
+const darkLogo = '../../public/logo-dark.png'
 const answersStore = useAnswersStore()
 
 function addChat() {
@@ -77,7 +82,7 @@ function addChat() {
 }
 
 .logo-icon {
-  color: var(--text-color);
+  color: var(--icon-color);
   transition: all 0.2s ease-in-out;
 }
 

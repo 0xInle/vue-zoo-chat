@@ -17,7 +17,7 @@ div {
   border: 1px solid var(--error-color);
   border-radius: 10px;
   box-shadow: 0 0 10px rgba(240, 85, 85, 0.3);
-  color: #fff;
+  color: var(--text-color);
   font-size: 14px;
   font-weight: 300;
 }
