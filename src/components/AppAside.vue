@@ -1,16 +1,11 @@
 <template>
   <Transition name="aside">
     <aside v-if="isVisible" class="aside" ref="aside">
-      <AppButton text="Новый чат" class="aside-btn" @click="addChat" />
+      <AppButton class="aside-newchat-btn" text="Новый чат" @click="addChat" />
       <ul class="aside-chat-list list-reset" ref="chatContainer">
-        <li v-for="chatId in chatIds" :key="chatId" class="aside-chat-title">
-          <button
-            class="aside-chat-btn btn-reset"
-            @click="answersStore.currentChatId = chatId"
-          >
-            <div class="aside-btn-text">
-              {{ answersStore.answer[chatId][0]?.message || 'Новый чат' }}
-            </div>
+        <li class="aside-chat-title" v-for="chat in chats" :key="chat.id">
+          <button class="aside-chat-btn btn-reset" @click="selectChat(chat.id)">
+            {{ chat.name }}
           </button>
         </li>
       </ul>
@@ -21,16 +16,20 @@
 <script setup lang="ts">
 import AppButton from './AppButton.vue'
 import { ref, defineProps, defineEmits, computed } from 'vue'
-import { useAnswersStore } from '@/stores/AnswersStore'
+import { useStore } from '@/stores/store'
 import { onClickOutside, onKeyStroke } from '@vueuse/core'
 
-const answersStore = useAnswersStore()
-const chatIds = computed(() => Object.keys(answersStore.answer).reverse())
+const store = useStore()
 const emit = defineEmits()
 const aside = ref<HTMLElement | null>(null)
+const chats = computed(() => store.chats)
+
+function selectChat(activeChatId: string) {
+  store.setActiveChat(activeChatId)
+}
 
 function addChat() {
-  answersStore.addChat()
+  store.createChat()
 }
 
 const props = defineProps({
@@ -52,18 +51,14 @@ onKeyStroke('Escape', () => {
   left: 0;
   width: 15%;
   height: calc(100vh - 40px);
+  padding: 10px;
   background-color: var(--form-color);
   box-shadow: 0 0 10px rgba(0, 0, 0, 0.3);
   border-radius: 10px;
   border-bottom-left-radius: 0;
   border-top-left-radius: 0;
-  /* transform: translateX(-100%); */
   transition: all 0.3s ease-in-out;
 }
-
-/* .aside-visible {
-  transform: translateX(0);
-} */
 
 .aside-btn {
   width: 100%;
@@ -92,6 +87,20 @@ onKeyStroke('Escape', () => {
   margin-bottom: 20px;
 }
 
+.aside-newchat-btn {
+  outline: none;
+  width: 100%;
+  padding: 10px;
+  margin-bottom: 10px;
+  text-align: left;
+  box-shadow: 0 0 10px rgba(var(--box-shadow-color) / 0.3);
+  border-radius: 10px;
+  color: var(--text-color);
+  font-size: 14px;
+  transition: all 0.2s ease-in-out;
+  text-align: center;
+}
+
 .aside-chat-btn {
   outline: none;
   width: 100%;
@@ -102,23 +111,20 @@ onKeyStroke('Escape', () => {
   color: var(--text-color);
   font-size: 14px;
   transition: all 0.2s ease-in-out;
-}
-
-.aside-chat-btn:hover {
-  box-shadow: 0 0 10px rgba(var(--box-shadow-hover-color) / 0.5);
-}
-
-.aside-chat-btn:focus {
-  box-shadow: 0 0 10px rgba(var(--box-shadow-hover-color) / 0.5);
-}
-
-.aside-chat-btn:active {
-  box-shadow: 0 0 10px rgba(var(--box-shadow-hover-color) / 0.5);
-}
-
-.aside-btn-text {
   overflow: hidden;
   text-overflow: ellipsis;
+
+  &:hover {
+    box-shadow: 0 0 10px rgba(var(--box-shadow-hover-color) / 0.5);
+  }
+
+  &:focus {
+    box-shadow: 0 0 10px rgba(var(--box-shadow-hover-color) / 0.5);
+  }
+
+  &:active {
+    box-shadow: 0 0 10px rgba(var(--box-shadow-hover-color) / 0.5);
+  }
 }
 
 .aside-enter-from,

@@ -6,8 +6,8 @@
           class="form-text"
           placeholder="Сообщение"
           rows="3"
-          v-model="message"
           ref="textarea"
+          v-model="userMessage"
           @keydown.enter.prevent="handleEnter"
         ></textarea>
         <AppButton
@@ -20,67 +20,40 @@
   </div>
 </template>
 
-<script setup lang="ts">
+<script setup>
 import AppButton from '@/components/AppButton.vue'
-import { useAnswersStore } from '@/stores/AnswersStore'
-import { sendMessageToAI } from '@/api/sendMessage'
-import { onMounted, nextTick, ref, computed, type Ref, watch } from 'vue'
+import { useStore } from '@/stores/store'
+import { ref, computed, onMounted } from 'vue'
 
-const message: Ref<string> = ref('')
-const answersStore = useAnswersStore()
-const textarea: Ref<HTMLTextAreaElement | null> = ref(null)
-
+const userMessage = ref('')
+const store = useStore()
+const textarea = ref(null)
 const isLoading = ref(false)
-const isDisabled = computed(() => message.value === '' || isLoading.value)
+const isDisabled = computed(() => userMessage.value === '' || isLoading.value)
+const hasChats = computed(() => store.chats.length > 0)
+const sendMessageToAI = store.sendMessageToAI
 
-function addMessage(): void {
-  if (!answersStore.currentChatId) {
-    answersStore.addChat()
+async function addMessage() {
+  const messageText = userMessage.value.trim()
+  userMessage.value = ''
+
+  if (!hasChats.value) {
+    const firstMessage = userMessage.value.trim() || 'Новый чат'
+    await store.createChat(firstMessage)
   }
 
-  const id = answersStore.currentChatId
-  if (!id) return
-
-  let currentChat = answersStore.answer[id]
-  if (!currentChat) {
-    answersStore.addChat()
-    const keys = Object.keys(answersStore.answer)
-    answersStore.currentChatId = keys[keys.length - 1] ?? null
-    currentChat = answersStore.answer[answersStore.currentChatId!]
+  store.addChatMessage(messageText, 'user')
+  const aiResponse = await sendMessageToAI(messageText)
+  if (aiResponse) {
+    store.addChatMessage(aiResponse, 'llm')
   }
-
-  if (!currentChat) return
-
-  isLoading.value = true
-
-  currentChat.push({ role: 'user', message: message.value })
-  localStorage.setItem('messageHistory', JSON.stringify(answersStore.answer))
-
-  const aiMessageIndex = currentChat.length
-  currentChat.push({ role: 'ai', replay: '', loading: true })
-  localStorage.setItem('messageHistory', JSON.stringify(answersStore.answer))
-
-  sendMessageToAI(message.value).then((result) => {
-    if (typeof result === 'string') {
-      currentChat[aiMessageIndex].replay = result
-    } else if (result && result.type === 'error') {
-      currentChat[aiMessageIndex].error = result
-    } else {
-      currentChat[aiMessageIndex].error = {
-        text: 'Неизвестная ошибка',
-        type: 'error',
-      }
-    }
-
-    currentChat[aiMessageIndex].loading = false
-    isLoading.value = false
-    localStorage.setItem('messageHistory', JSON.stringify(answersStore.answer))
-  })
-
-  message.value = ''
 }
 
-function handleEnter(event: KeyboardEvent): void {
+onMounted(() => {
+  textarea.value?.focus()
+})
+
+function handleEnter(event) {
   if (event.shiftKey) {
     message.value += '\n'
     nextTick(() => {
@@ -93,32 +66,6 @@ function handleEnter(event: KeyboardEvent): void {
     addMessage()
   }
 }
-
-onMounted(() => {
-  textarea.value?.focus()
-
-  const localHistory = localStorage.getItem('messageHistory')
-  if (localHistory) {
-    answersStore.answer = JSON.parse(localHistory)
-
-    const length = Object.keys(answersStore.answer).length
-    answersStore.chatCounter = length
-  }
-
-  answersStore.currentChatId = null
-})
-
-watch(
-  () => answersStore.focusTextarea,
-  (val) => {
-    if (val) {
-      nextTick(() => {
-        textarea.value?.focus()
-        answersStore.focusTextarea = false
-      })
-    }
-  }
-)
 </script>
 
 <style scoped>

@@ -23,19 +23,19 @@
   </header>
 </template>
 
-<script setup lang="ts">
+<script setup>
 import IconSidebar from '@/assets/icons/icon-sidebar.svg'
 import IconNewChat from '@/assets/icons/icon-new-chat.svg'
-import { useAnswersStore } from '@/stores/AnswersStore'
+import { useStore } from '@/stores/store'
 import { useColorMode } from '@vueuse/core'
 
 const { state } = useColorMode()
 const lightLogo = '../../public/logo.png'
 const darkLogo = '../../public/logo-dark.png'
-const answersStore = useAnswersStore()
+const store = useStore()
 
 function addChat() {
-  answersStore.addChat()
+  store.createChat('Новый чат')
 }
 </script>
 

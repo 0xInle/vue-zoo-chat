@@ -20,12 +20,18 @@ import IconCheck from '@/assets/icons/icon-check.svg'
 import IconRegenerate from '@/assets/icons/icon-regenerate.svg'
 import { defineProps } from 'vue'
 import { useClipboard } from '@vueuse/core'
+import { marked } from 'marked'
 
 const props = defineProps<{ text: string }>()
 const { copy, copied } = useClipboard()
 
-function handleCopy() {
-  copy(props.text)
+async function handleCopy() {
+  const html = await marked.parse(props.text)
+  const temp = document.createElement('div')
+  temp.innerHTML = html
+  const plainText = temp.textContent || temp.innerText || ''
+
+  copy(plainText)
 }
 
 function regenerateReplay(text: string) {
@@ -37,6 +43,7 @@ function regenerateReplay(text: string) {
 .app-toolbar {
   display: flex;
   max-height: 16px;
+  margin-bottom: 20px;
 }
 
 .app-icon-btn {

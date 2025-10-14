@@ -1,51 +1,42 @@
 <template>
   <div class="app-container" ref="appContainer" tabindex="-1">
-    <div v-for="message in currentChat" class="app-answer">
-      <div class="user-message" v-if="message.message">
-        {{ message.message }}
+    <div class="app-loader" v-if="messages.length === 0"></div>
+    <div
+      class="app-answer"
+      v-else
+      v-for="message in messages"
+      :key="message.id"
+    >
+      <div class="user-message" v-if="message.sender === 'user'">
+        {{ message.text }}
       </div>
       <div
         class="ai-message"
-        v-if="
-          message.loading ||
-          (typeof message.replay === 'string' && message.replay.trim() !== '')
-        "
-      >
-        <div
-          v-if="!message.loading"
-          v-html="message.replay ? marked(message.replay) : ''"
-        ></div>
-        <Loader v-else />
-        <AppToolbar
-          v-if="!message.loading && typeof message.replay === 'string'"
-          :text="message.replay"
-        />
-      </div>
-      <div class="error-message" v-if="message.error">
-        {{ message.error.text }}
+        v-else-if="message.sender === 'llm'"
+        v-html="marked.parse(message.text)"
+      ></div>
+      <AppToolbar v-if="message.sender === 'llm'" :text="message.text" />
+      <div class="error-message" v-if="store.localizedError">
+        {{ store.localizedError }}
       </div>
     </div>
+    <Loader
+      class="user-loader"
+      v-if="messages.length && messages[messages.length - 1].sender === 'user'"
+    />
   </div>
 </template>
 
-<script setup lang="ts">
-import { ref, onMounted, watch, nextTick, type Ref, computed } from 'vue'
-import { useAnswersStore } from '@/stores/AnswersStore'
-import { storeToRefs } from 'pinia'
-import { marked } from 'marked'
+<script setup>
 import Loader from './ui/Loader.vue'
 import AppToolbar from './AppToolbar.vue'
+import { watch, onMounted, ref, nextTick, computed } from 'vue'
+import { useStore } from '@/stores/store'
+import { marked } from 'marked'
 
-const answersStore = useAnswersStore()
-const { answer } = storeToRefs(answersStore)
-
-const currentChat = computed(() => {
-  const idx = answersStore.currentChatId
-  if (idx === null || answersStore.answer[idx] === undefined) return []
-  return answersStore.answer[idx]
-})
-
-const appContainer: Ref<HTMLDivElement | null> = ref(null)
+const store = useStore()
+const messages = computed(() => store.activeChatMessages)
+const appContainer = ref(null)
 
 const scrollToBottom = () => {
   nextTick(() => {
@@ -60,7 +51,7 @@ onMounted(() => {
 })
 
 watch(
-  answer,
+  messages,
   () => {
     scrollToBottom()
   },
@@ -70,6 +61,7 @@ watch(
 
 <style scoped>
 .app-container {
+  position: relative;
   outline: none;
   width: 100%;
   height: 100%;
@@ -117,5 +109,16 @@ watch(
   border-radius: 10px;
   color: var(--error-color);
   box-shadow: 0 0 10px rgba(240, 85, 85, 0.3);
+}
+
+.user-loader {
+  margin-bottom: 20px;
+}
+
+.app-loader {
+  position: absolute;
+  top: 50%;
+  left: 50%;
+  transform: translate(-50%, -50%);
 }
 </style>

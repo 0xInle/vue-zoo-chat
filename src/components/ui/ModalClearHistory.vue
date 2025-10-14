@@ -6,7 +6,7 @@
         Данные будут удалены без возможности восстановления.
       </div>
       <div class="modal-btn-container">
-        <AppButton class="modal-btn" text="Да" @click="clearHistory" />
+        <AppButton class="modal-btn" text="Да" @click="deleteAllChat" />
         <AppButton class="modal-btn" text="Нет" @click="closeModal" />
       </div>
     </div>
@@ -16,20 +16,20 @@
 <script setup lang="ts">
 import AppButton from '../AppButton.vue'
 import { defineEmits, defineProps } from 'vue'
-import { useAnswersStore } from '@/stores/AnswersStore'
+import { useStore } from '@/stores/store'
 
-const store = useAnswersStore()
+const store = useStore()
+
+function deleteAllChat() {
+  store.deleteAllChats()
+  emit('closeModal')
+}
 
 const props = defineProps({
   isOpenClearHistiry: Boolean,
 })
 
 const emit = defineEmits(['closeModal'])
-
-function clearHistory() {
-  store.clearHistory()
-  emit('closeModal')
-}
 
 function closeModal() {
   emit('closeModal')
