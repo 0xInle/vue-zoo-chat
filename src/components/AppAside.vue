@@ -18,6 +18,8 @@ import AppButton from './AppButton.vue'
 import { ref, defineProps, defineEmits, computed } from 'vue'
 import { useStore } from '@/stores/store'
 import { onClickOutside, onKeyStroke } from '@vueuse/core'
+import { createChat } from '@/stores/chatService'
+import { setActiveChat } from '@/stores/chatService'
 
 const store = useStore()
 const emit = defineEmits()
@@ -25,11 +27,11 @@ const aside = ref<HTMLElement | null>(null)
 const chats = computed(() => store.chats)
 
 function selectChat(activeChatId: string) {
-  store.setActiveChat(activeChatId)
+  setActiveChat(activeChatId, store)
 }
 
 function addChat() {
-  store.createChat()
+  createChat(store)
 }
 
 const props = defineProps({

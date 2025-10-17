@@ -17,11 +17,12 @@
 import AppButton from '../AppButton.vue'
 import { defineEmits, defineProps } from 'vue'
 import { useStore } from '@/stores/store'
+import { deleteAllChats } from '@/stores/chatService'
 
 const store = useStore()
 
 function deleteAllChat() {
-  store.deleteAllChats()
+  deleteAllChats(store)
   emit('closeModal')
 }
 

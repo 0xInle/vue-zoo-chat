@@ -22,18 +22,27 @@ import AppWelcomeContent from '@/components/AppWelcomeContent.vue'
 import AppMessageForm from '@/components/AppMessageForm.vue'
 import AppProfileBar from '@/components/AppProfileBar.vue'
 import { useStore } from '@/stores/store'
+import {
+  initAuthStateListener,
+  cleanupAllListeners,
+} from '@/stores/authService'
 
 const store = useStore()
 const isVisible = ref(false)
+const isInitialLoading = ref(true)
 
 const hasMessages = computed(() => store.messages.length > 0)
 const showWelcome = computed(
   () => !isInitialLoading.value && !hasMessages.value
 )
-const isInitialLoading = ref(true)
 
 onMounted(async () => {
-  await store.initAuthStateListener()
+  await initAuthStateListener(store)
+  isInitialLoading.value = false
+})
+
+onMounted(async () => {
+  await initAuthStateListener(store)
 
   if (store.activeChatId && store.currentUser) {
     await new Promise<void>((resolve) => {
@@ -56,7 +65,7 @@ function showAside() {
 }
 
 onUnmounted(() => {
-  store.cleanupAllListeners()
+  cleanupAllListeners()
 })
 </script>
 

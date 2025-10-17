@@ -20,42 +20,47 @@
   </div>
 </template>
 
-<script setup>
+<script setup lang="ts">
 import AppButton from '@/components/AppButton.vue'
 import { useStore } from '@/stores/store'
-import { ref, computed, onMounted } from 'vue'
+import { ref, computed, onMounted, nextTick } from 'vue'
+import { addChatMessage } from '@/stores/messageService'
+import { createChat } from '@/stores/chatService'
+import { sendMessageToAI } from '@/stores/messageToAi'
 
 const userMessage = ref('')
 const store = useStore()
-const textarea = ref(null)
+const textarea = ref<HTMLTextAreaElement | null>(null)
 const isLoading = ref(false)
 const isDisabled = computed(() => userMessage.value === '' || isLoading.value)
 const hasChats = computed(() => store.chats.length > 0)
-const sendMessageToAI = store.sendMessageToAI
 
 async function addMessage() {
+  if (isLoading.value) return
   const messageText = userMessage.value.trim()
   userMessage.value = ''
+  isLoading.value = true
 
   if (!hasChats.value) {
-    const firstMessage = userMessage.value.trim() || 'Новый чат'
-    await store.createChat(firstMessage)
+    await createChat(store)
   }
 
-  store.addChatMessage(messageText, 'user')
-  const aiResponse = await sendMessageToAI(messageText)
+  addChatMessage(messageText, 'user', store)
+  const aiResponse = await sendMessageToAI(messageText, store)
   if (aiResponse) {
-    store.addChatMessage(aiResponse, 'llm')
+    addChatMessage(aiResponse, 'llm', store)
   }
+
+  isLoading.value = false
 }
 
 onMounted(() => {
   textarea.value?.focus()
 })
 
-function handleEnter(event) {
+function handleEnter(event: KeyboardEvent) {
   if (event.shiftKey) {
-    message.value += '\n'
+    userMessage.value += '\n'
     nextTick(() => {
       const el = textarea.value
       if (el) {

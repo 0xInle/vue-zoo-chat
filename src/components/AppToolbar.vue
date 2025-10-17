@@ -1,15 +1,13 @@
 <template>
   <div class="app-toolbar">
-    <button class="app-icon-btn btn-reset" @click="handleCopy" tabindex="-1">
+    <button class="app-icon-btn btn-reset" @click="handleCopy">
       <IconCopy class="app-icon-copy" v-if="!copied" />
     </button>
     <IconCheck v-if="copied" style="margin-left: -10px; margin-right: 8px" />
-    <button
-      class="app-icon-btn btn-reset"
-      tabindex="-1"
-      @click="regenerateReplay(text)"
-    >
-      <IconRegenerate />
+    <button class="app-icon-btn btn-reset" @click="regenerateReplay()">
+      <IconRegenerate
+        :class="['app-icon-regenerate', { rotating: isRotating }]"
+      />
     </button>
   </div>
 </template>
@@ -18,12 +16,16 @@
 import IconCopy from '@/assets/icons/icon-copy.svg'
 import IconCheck from '@/assets/icons/icon-check.svg'
 import IconRegenerate from '@/assets/icons/icon-regenerate.svg'
-import { defineProps } from 'vue'
 import { useClipboard } from '@vueuse/core'
 import { marked } from 'marked'
+import { useStore } from '@/stores/store'
+import { defineProps, ref } from 'vue'
+import { regenerateMessage } from '@/stores/messageService'
 
-const props = defineProps<{ text: string }>()
+const props = defineProps<{ text: string; messageId: string }>()
 const { copy, copied } = useClipboard()
+const store = useStore()
+const isRotating = ref(false)
 
 async function handleCopy() {
   const html = await marked.parse(props.text)
@@ -34,8 +36,10 @@ async function handleCopy() {
   copy(plainText)
 }
 
-function regenerateReplay(text: string) {
-  console.log('Тут будет логика регенерации ответа.')
+async function regenerateReplay() {
+  isRotating.value = true
+  await regenerateMessage(props.messageId, store)
+  isRotating.value = false
 }
 </script>
 
@@ -47,10 +51,37 @@ function regenerateReplay(text: string) {
 }
 
 .app-icon-btn {
-  color: var(--text-color);
+  outline: none;
+  color: var(--btn-color);
+  transition: all 0.2s ease-in-out;
 }
 
 .app-icon-btn:not(:last-child) {
   margin-right: 10px;
+}
+
+.app-icon-btn {
+  &:hover {
+    color: var(--text-color);
+    transform: scale(1.1);
+  }
+
+  &:focus {
+    color: var(--text-color);
+    transform: scale(1.1);
+  }
+}
+
+.rotating {
+  animation: spin 1s linear infinite;
+}
+
+@keyframes spin {
+  from {
+    transform: rotate(0deg);
+  }
+  to {
+    transform: rotate(360deg);
+  }
 }
 </style>

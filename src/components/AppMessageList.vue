@@ -15,7 +15,11 @@
         v-else-if="message.sender === 'llm'"
         v-html="marked.parse(message.text)"
       ></div>
-      <AppToolbar v-if="message.sender === 'llm'" :text="message.text" />
+      <AppToolbar
+        v-if="message.sender === 'llm'"
+        :text="message.text"
+        :messageId="message.id"
+      />
       <div class="error-message" v-if="store.localizedError">
         {{ store.localizedError }}
       </div>
@@ -120,5 +124,9 @@ watch(
   top: 50%;
   left: 50%;
   transform: translate(-50%, -50%);
+}
+
+.regenerated-loader {
+  margin-bottom: 20px;
 }
 </style>
