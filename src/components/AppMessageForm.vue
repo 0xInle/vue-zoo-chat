@@ -26,7 +26,7 @@ import { useStore } from '@/stores/store'
 import { ref, computed, onMounted, nextTick } from 'vue'
 import { addChatMessage } from '@/stores/messageService'
 import { createChat } from '@/stores/chatService'
-import { sendMessageToAI } from '@/stores/messageToAi'
+import { sendMessageToAI } from '@/services/messageToAi'
 
 const userMessage = ref('')
 const store = useStore()

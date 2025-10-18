@@ -43,7 +43,8 @@ export async function sendMessageToAI(
           'Content-Type': 'application/json',
         },
         body: JSON.stringify({
-          model: 'deepseek/deepseek-chat-v3.1',
+          // model: 'deepseek/deepseek-chat-v3.1',
+          model: `${store.model}`,
           messages: [
             {
               role: 'user',

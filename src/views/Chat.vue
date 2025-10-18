@@ -1,4 +1,5 @@
 <template>
+  <div class="model">{{ currentModelName }}</div>
   <AppLogoBar @showAside="showAside" v-if="!isVisible" />
   <AppAside v-model:isVisible="isVisible" />
 
@@ -34,6 +35,19 @@ const isInitialLoading = ref(true)
 const hasMessages = computed(() => store.messages.length > 0)
 const showWelcome = computed(
   () => !isInitialLoading.value && !hasMessages.value
+)
+
+const modelNames: Record<string, string> = {
+  'deepseek/deepseek-chat-v3.1': 'DeepSeek Chat v3.1',
+  'openai/gpt-oss-20b': 'OpenAI GPT-4o',
+  'nvidia/nemotron-nano-9b-v2': 'NVIDIA Nemotron 9B',
+  'google/gemma-3n-e2b-it:free': 'Google Gemma 3N',
+  'meituan/longcat-flash-chat': 'LongCat (Meituan)',
+  'z-ai/glm-4.5-air': 'GLM-4.5 (Z.AI)',
+}
+
+const currentModelName = computed(() =>
+  store.model ? modelNames[store.model] || store.model : 'Не выбрана'
 )
 
 onMounted(async () => {
@@ -89,5 +103,14 @@ onUnmounted(() => {
 
 .flex {
   width: 100%;
+}
+
+.model {
+  position: fixed;
+  bottom: 0;
+  right: 0;
+  padding: 20px;
+  color: var(--contacts-text-color);
+  font-size: 12px;
 }
 </style>

@@ -27,6 +27,7 @@ export const useStore = defineStore('store', () => {
   const messages = ref<ChatMessage[]>([])
   const loadingMessages = ref(false)
   const localizedError = ref<string | null>(null)
+  const model = ref<string | null>('deepseek/deepseek-chat-v3.1')
 
   const isAuthenticated = computed(() => currentUser.value !== null)
   const hasChats = computed(() => chats.value.length > 0)
@@ -59,5 +60,6 @@ export const useStore = defineStore('store', () => {
     activeChatMessages,
     loadingMessages,
     localizedError,
+    model,
   }
 })

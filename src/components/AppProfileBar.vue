@@ -28,6 +28,15 @@
             <li class="profile-item">
               <button
                 class="profile-btn-action btn-reset"
+                @click="openModal('model')"
+              >
+                <IconSettings class="profile-btn-icon" />
+                Выбрать модель
+              </button>
+            </li>
+            <li class="profile-item">
+              <button
+                class="profile-btn-action btn-reset"
                 @click="openModal('contacts')"
               >
                 <IconContact class="profile-btn-icon" />
@@ -66,6 +75,18 @@
     <teleport to="body">
       <Transition
         name="fade"
+        @after-enter="useModelModal.onEnter"
+        @after-leave="useModelModal.onLeave"
+      >
+        <ModalModel
+          v-if="modelModal"
+          ref="modelModalRef"
+          @closeModelModal="closeModal('model')"
+          @keydown.esc="modelModal = false"
+        />
+      </Transition>
+      <Transition
+        name="fade"
         @after-enter="useHistoryModal.onEnter"
         @after-leave="useHistoryModal.onLeave"
       >
@@ -100,12 +121,14 @@ import IconDot from '@/assets/icons/icon-dot.svg'
 import IconContact from '@/assets/icons/icon-contact.svg'
 import IconDatabase from '@/assets/icons/icon-database.svg'
 import IconLogout from '@/assets/icons/icon-logout.svg'
+import IconSettings from '@/assets/icons/icon-settings.svg'
+import ModalClearHistory from './ui/ModalClearHistory.vue'
+import ModalContacts from './ui/ModalContacts.vue'
+import ModalModel from './ui/ModalModel.vue'
 import { ref, nextTick, inject, type Ref, Teleport } from 'vue'
 import { onClickOutside, useColorMode } from '@vueuse/core'
 import { auth } from '@/firebaseConfig'
 import { useRouter } from 'vue-router'
-import ModalClearHistory from './ui/ModalClearHistory.vue'
-import ModalContacts from './ui/ModalContacts.vue'
 import { useModalFocus } from '@/composables/useModalFocus'
 
 const userName = inject('userName') as Ref<string | null>
@@ -113,13 +136,18 @@ const userAvatar = inject('userAvatar') as Ref<string | null>
 const router = useRouter()
 const historyModal = ref(false)
 const contactsModal = ref(false)
+const modelModal = ref(false)
 const contactsModalRef = ref()
 const historyModalRef = ref()
+const modelModalRef = ref()
 const useContactsModal = useModalFocus(contactsModalRef)
 const useHistoryModal = useModalFocus(historyModalRef)
+const useModelModal = useModalFocus(modelModalRef)
+
 const modals = {
   history: historyModal,
   contacts: contactsModal,
+  model: modelModal,
 }
 const theme = ref(true)
 const mode = useColorMode()

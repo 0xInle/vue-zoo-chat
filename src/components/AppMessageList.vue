@@ -95,6 +95,7 @@ watch(
   width: 50%;
   margin-left: auto;
   max-width: 50%;
+  margin-bottom: 20px;
   padding: 10px;
   max-width: fit-content;
   color: var(--icon-color);
