@@ -113,4 +113,26 @@ onUnmounted(() => {
   color: var(--contacts-text-color);
   font-size: 12px;
 }
+
+@media (width <= 1420px) {
+  .main {
+    padding-top: 80px;
+    padding-bottom: 20px;
+  }
+
+  .model {
+    padding: 0 20px 0 0;
+  }
+}
+
+@media (width <= 1024px) {
+  .main {
+    padding: 80px 10px 20px 10px;
+  }
+
+  .model {
+    right: 50%;
+    transform: translate(50%);
+  }
+}
 </style>

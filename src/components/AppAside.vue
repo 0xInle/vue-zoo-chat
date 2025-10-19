@@ -52,6 +52,7 @@ onKeyStroke('Escape', () => {
   position: absolute;
   left: 0;
   width: 15%;
+  min-width: 200px;
   height: calc(100vh - 40px);
   padding: 10px;
   background-color: var(--form-color);
@@ -141,5 +142,17 @@ onKeyStroke('Escape', () => {
 .aside-enter-active,
 .aside-leave-active {
   transition: all 0.2s ease-in-out;
+}
+
+@media (width <= 1420px) {
+  .aside {
+    z-index: 1;
+  }
+}
+
+@media (width <= 480px) {
+  .aside {
+    height: calc(100vh - 20px);
+  }
 }
 </style>

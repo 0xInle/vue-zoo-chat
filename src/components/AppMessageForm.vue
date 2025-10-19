@@ -102,4 +102,10 @@ function handleEnter(event: KeyboardEvent) {
   opacity: 0.5;
   cursor: not-allowed;
 }
+
+@media (width <= 480px) {
+  .form-wrapper {
+    margin: 0;
+  }
+}
 </style>

@@ -97,3 +97,9 @@ html {
   justify-content: center;
   height: 100vh;
 }
+
+@media (max-width: 480px) {
+  .app {
+    padding: 10px;
+  }
+}

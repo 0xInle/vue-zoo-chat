@@ -90,6 +90,7 @@ function flipModel(type: keyof typeof modals) {
   align-items: center;
   position: absolute;
   width: 20%;
+  min-width: 250px;
   top: 50%;
   left: 50%;
   transform: translate(-50%, -50%);

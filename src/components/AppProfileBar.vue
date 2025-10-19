@@ -349,4 +349,22 @@ function toggleTheme() {
 .fade-leave-from {
   opacity: 1;
 }
+
+@media (width <= 480px) {
+  .profile-container {
+    padding-right: 10px;
+    padding-top: 10px;
+  }
+
+  .profile-avatar,
+  .profile-name {
+    display: none;
+  }
+
+  .profile-dropdown {
+    min-width: 200px;
+    margin: 10px 0;
+    right: 10px;
+  }
+}
 </style>

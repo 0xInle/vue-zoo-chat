@@ -295,4 +295,28 @@ const isFormValid = computed(() => {
   pointer-events: none;
   opacity: 0.3;
 }
+
+@media (width <= 1024px) {
+  .register-container {
+    width: 40%;
+  }
+}
+
+@media (width <= 768px) {
+  .register-container {
+    width: 50%;
+  }
+}
+
+@media (width <= 640px) {
+  .register-container {
+    width: 75%;
+  }
+}
+
+@media (width <= 480px) {
+  .register-container {
+    width: 100%;
+  }
+}
 </style>

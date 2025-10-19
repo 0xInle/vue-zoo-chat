@@ -269,4 +269,28 @@ const isFormValid = computed(() => {
   font-size: 10px;
   color: var(--error-color);
 }
+
+@media (width <= 1024px) {
+  .reset-container {
+    width: 40%;
+  }
+}
+
+@media (width <= 768px) {
+  .reset-container {
+    width: 50%;
+  }
+}
+
+@media (width <= 640px) {
+  .reset-container {
+    width: 75%;
+  }
+}
+
+@media (width <= 480px) {
+  .reset-container {
+    width: 100%;
+  }
+}
 </style>

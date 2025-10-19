@@ -96,4 +96,11 @@ function addChat() {
   color: var(--bg-page-color);
   transform: scale(1.1);
 }
+
+@media (width <= 480px) {
+  .logo {
+    padding-left: 10px;
+    padding-top: 10px;
+  }
+}
 </style>

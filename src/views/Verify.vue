@@ -138,4 +138,28 @@ onAuthStateChanged(auth, (user) => {
   pointer-events: none;
   opacity: 0.3;
 }
+
+@media (width <= 1024px) {
+  .verify-container {
+    width: 40%;
+  }
+}
+
+@media (width <= 768px) {
+  .verify-container {
+    width: 50%;
+  }
+}
+
+@media (width <= 640px) {
+  .verify-container {
+    width: 75%;
+  }
+}
+
+@media (width <= 480px) {
+  .verify-container {
+    width: 100%;
+  }
+}
 </style>

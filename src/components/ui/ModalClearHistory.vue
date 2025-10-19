@@ -54,7 +54,6 @@ function closeModal() {
 .modal {
   display: flex;
   flex-direction: column;
-  align-items: center;
   position: absolute;
   top: 50%;
   left: 50%;
@@ -66,12 +65,14 @@ function closeModal() {
 
 .modal-title {
   margin-bottom: 20px;
+  text-align: center;
   font-size: 14px;
   color: var(--text-color);
 }
 
 .modal-subtitle {
   margin-bottom: 20px;
+  text-align: center;
   font-size: 14px;
   color: var(--text-color);
 }
@@ -84,5 +85,17 @@ function closeModal() {
 
 .modal-btn {
   width: 100%;
+}
+
+@media (width <= 768px) {
+  .modal {
+    width: 75%;
+  }
+}
+
+@media (width <= 480px) {
+  .modal {
+    width: 90%;
+  }
 }
 </style>

@@ -1,6 +1,6 @@
 <template>
   <transition name="error-popup">
-    <div v-if="text">{{ text }}</div>
+    <div class="error-content" v-if="text">{{ text }}</div>
   </transition>
 </template>
 
@@ -9,10 +9,11 @@ const props = defineProps<{ text?: string }>()
 </script>
 
 <style scoped>
-div {
+.error-content {
   position: absolute;
-  max-width: 40%;
+  width: 30%;
   top: 30px;
+  margin: 0 10px;
   padding: 20px;
   border: 1px solid var(--error-color);
   border-radius: 10px;
@@ -42,5 +43,29 @@ div {
 }
 .error-popup-leave-to {
   opacity: 0;
+}
+
+@media (width <= 1024px) {
+  .error-content {
+    width: 40%;
+  }
+}
+
+@media (width <= 768px) {
+  .error-content {
+    width: 50%;
+  }
+}
+
+@media (width <= 640px) {
+  .error-content {
+    width: 75%;
+  }
+}
+
+@media (width <= 480px) {
+  .error-content {
+    width: 95%;
+  }
 }
 </style>

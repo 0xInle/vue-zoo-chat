@@ -70,6 +70,7 @@ function closeContactsModal() {
 }
 
 .modal-title {
+  text-align: center;
   margin-bottom: 20px;
   font-size: 14px;
   color: var(--text-color);
@@ -100,5 +101,18 @@ function closeContactsModal() {
 
 .modal-icon {
   margin-right: 5px;
+}
+
+@media (width <=768px) {
+  .modal {
+    width: 60%;
+  }
+}
+
+@media (width <=480px) {
+  .modal {
+    top: 10px;
+    width: 75%;
+  }
 }
 </style>

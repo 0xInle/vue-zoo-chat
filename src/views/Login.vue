@@ -134,7 +134,7 @@ async function signInWithGoogle() {
     googleError.value = useErrorHandler(error.code, 'login')
 
     if (googleError.value) {
-      useTimeoutError(googleError, 5000)
+      useTimeoutError(googleError, 55000)
     }
   } finally {
     isLoadingGoogle.value = false
@@ -331,5 +331,29 @@ const onSubmit = async () => {
   bottom: -15px;
   font-size: 10px;
   color: var(--error-color);
+}
+
+@media (width <= 1024px) {
+  .login-container {
+    width: 40%;
+  }
+}
+
+@media (width <= 768px) {
+  .login-container {
+    width: 50%;
+  }
+}
+
+@media (width <= 640px) {
+  .login-container {
+    width: 75%;
+  }
+}
+
+@media (width <= 480px) {
+  .login-container {
+    width: 100%;
+  }
 }
 </style>

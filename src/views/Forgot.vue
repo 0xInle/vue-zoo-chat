@@ -216,4 +216,28 @@ const formSubmit = async function resetPassword() {
 .invalid {
   border-color: var(--error-color);
 }
+
+@media (width <= 1024px) {
+  .forgot-container {
+    width: 40%;
+  }
+}
+
+@media (width <= 768px) {
+  .forgot-container {
+    width: 50%;
+  }
+}
+
+@media (width <= 640px) {
+  .forgot-container {
+    width: 75%;
+  }
+}
+
+@media (width <= 480px) {
+  .forgot-container {
+    width: 100%;
+  }
+}
 </style>
