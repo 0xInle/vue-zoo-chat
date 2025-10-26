@@ -284,12 +284,12 @@ const onSubmit = async () => {
 }
 
 .login-btn-google:hover {
-  background-color: var(--text-color);
+  background-color: var(--icon-color);
   color: var(--dark-color);
 }
 
 .login-btn-google:focus {
-  background-color: var(--text-color);
+  background-color: var(--icon-color);
   color: var(--dark-color);
 }
 
@@ -306,7 +306,7 @@ const onSubmit = async () => {
 }
 
 .login-btn-google:active {
-  background-color: var(--text-color);
+  background-color: var(--icon-color);
   color: var(--dark-color);
 }
 

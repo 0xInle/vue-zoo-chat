@@ -14,6 +14,7 @@ export async function createChat(
 ): Promise<string | null> {
   if (!store.currentUser) return null
 
+  store.isCreatingChat = true
   try {
     const chatsCollectionRef = collection(
       db,
@@ -28,6 +29,8 @@ export async function createChat(
   } catch (error) {
     console.error('Ошибка при создании нового чата:', error)
     return null
+  } finally {
+    store.isCreatingChat = false
   }
 }
 

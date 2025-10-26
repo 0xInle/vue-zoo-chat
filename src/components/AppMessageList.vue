@@ -94,7 +94,7 @@ watch(
 .user-message {
   width: 50%;
   margin-left: auto;
-  max-width: 50%;
+  /* max-width: 50%; */
   margin-bottom: 20px;
   padding: 10px;
   max-width: fit-content;
@@ -129,5 +129,11 @@ watch(
 
 .regenerated-loader {
   margin-bottom: 20px;
+}
+
+@media (width <= 768px) {
+  .user-message {
+    width: 75%;
+  }
 }
 </style>

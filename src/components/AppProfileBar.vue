@@ -149,8 +149,8 @@ const modals = {
   contacts: contactsModal,
   model: modelModal,
 }
-const theme = ref(true)
 const mode = useColorMode()
+const theme = ref(mode.value === 'dark')
 const isOpen = ref(false)
 const target = ref<HTMLElement | null>(null)
 

@@ -32,8 +32,8 @@ import { useStore } from '@/stores/store'
 
 const store = useStore()
 const { state } = useColorMode()
-const lightLogo = '../../public/logo.png'
-const darkLogo = '../../public/logo-dark.png'
+const lightLogo = '/logo.png'
+const darkLogo = '/logo-dark.png'
 
 function addChat() {
   createChat(store)

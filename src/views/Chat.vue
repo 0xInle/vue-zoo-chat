@@ -4,7 +4,7 @@
   <AppAside v-model:isVisible="isVisible" />
 
   <main class="main">
-    <Loader v-if="isInitialLoading" />
+    <Loader v-if="isInitialLoading || store.isCreatingChat" />
     <AppWelcomeContent v-else-if="showWelcome" />
     <AppMessageList v-else />
     <AppMessageForm v-if="!isInitialLoading" />
@@ -89,7 +89,7 @@ onUnmounted(() => {
   flex-direction: column;
   justify-content: center;
   align-items: center;
-  height: 100vh;
+  height: 100dvh;
   width: 100%;
   max-width: 800px;
   margin: 0 auto;
