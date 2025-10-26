@@ -36,7 +36,8 @@
 
 body {
   font-family: Roboto, sans-serif;
-  background-color: var(--bg-page-color);
+  /* background-color: var(--bg-page-color); */
+  background-color: rgb(197, 192, 192);
   overflow-y: auto;
 }
 

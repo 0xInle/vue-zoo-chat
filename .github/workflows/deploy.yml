@@ -1,10 +1,10 @@
-name: Deploy Vue Build
+name: Build Vue App
 
 on:
   workflow_dispatch:
 
 jobs:
-  deploy:
+  build:
     runs-on: ubuntu-latest
 
     steps:
@@ -15,7 +15,7 @@ jobs:
       - name: Setup Node.js
         uses: actions/setup-node@v3
         with:
-          node-version: 20
+          node-version: '20' # или нужная версия
 
       # 3. Устанавливаем зависимости
       - run: npm install
@@ -23,13 +23,10 @@ jobs:
       # 4. Собираем продакшн-билд
       - run: npm run build
 
-      # 5. Устанавливаем SSH ключ
-      - name: Install SSH Key
-        uses: shimataro/ssh-key-action@v2.3.1
+      # 5. Пушим dist в отдельную ветку (например, gh-pages)
+      - name: Push Build to gh-pages
+        uses: peaceiris/actions-gh-pages@v7
         with:
-          key: ${{ secrets.SSH_PRIVATE_KEY }}
-          known_hosts: ${{ secrets.REG_HOST }}
-
-      # 6. Копируем билд на сервер
-      - name: Deploy Build via SCP
-        run: scp -r dist/* ${{ secrets.REG_USER }}@${{ secrets.REG_HOST_IP }}:/var/www/u3121364/data/www/zoo-chat.xyz/
+          github_token: ${{ secrets.GITHUB_TOKEN }}
+          publish_dir: ./dist
+          publish_branch: build # можешь назвать gh-pages или build
