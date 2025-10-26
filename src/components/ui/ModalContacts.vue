@@ -7,7 +7,7 @@
       <ul class="modal-list list-reset">
         <li>
           <a
-            href="mailto:sergeybiryukovdev@gmail.com"
+            href="mailto:xsk8er26x@gmail.com"
             target="_blank"
             class="modal-link link-reset"
           >
