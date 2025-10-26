@@ -37,7 +37,7 @@ jobs:
       #     script: rm -rf /var/www/u3121364/data/www/zoo-chat.xyz/*
       #     passphrase: ''
 
-      # Копируем новый билд на сервер
+      #Копируем новый билд на сервер
       - name: Upload build to server
         uses: appleboy/scp-action@v0.1.0
         with:
