@@ -35,6 +35,7 @@ onAuthStateChanged(auth, (user) => {
     }
   }
 })
+
 provide('userName', userName)
 provide('userAvatar', userAvatar)
 </script>
