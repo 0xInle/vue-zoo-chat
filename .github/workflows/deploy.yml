@@ -34,8 +34,8 @@ jobs:
           username: ${{ secrets.REG_USER }}
           key: ${{ secrets.SSH_PRIVATE_KEY }}
           port: 22
-          script: |
-            rm -rf /var/www/u3121364/data/www/zoo-chat.xyz/*
+          script: rm -rf /var/www/u3121364/data/www/zoo-chat.xyz/*
+          passphrase: ''
 
       # Копируем новый билд на сервер
       - name: Upload build to server
