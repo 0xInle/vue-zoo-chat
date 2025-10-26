@@ -9,41 +9,42 @@ jobs:
     runs-on: ubuntu-latest
 
     steps:
-      #Скачиваем репозиторий
       - uses: actions/checkout@v3
 
-      # Устанавливаем Node.js
       - name: Setup Node.js
         uses: actions/setup-node@v3
         with:
           node-version: 20
 
-      # Устанавливаем зависимости
       - name: Install dependencies
         run: npm ci
 
-      # Сборка проекта
       - name: Build project
         run: npm run build
 
-      #Чистим старые файлы на сервере
-      # - name: Clean remote directory
-      #   uses: appleboy/ssh-action@v0.1.8
-      #   with:
-      #     host: ${{ secrets.REG_HOST }}
-      #     username: ${{ secrets.REG_USER }}
-      #     key: ${{ secrets.SSH_PRIVATE_KEY }}
-      #     port: 22
-      #     script: rm -rf /var/www/u3121364/data/www/zoo-chat.xyz/*
-      #     passphrase: ''
+      # --- Создаем файл с приватным ключом из секрета ----------
+      - name: Create SSH key file
+        run: |
+          mkdir -p ~/.ssh
+          # если секрет хранит многострочный ключ, то этот вариант сработает:
+          echo "${{ secrets.SSH_PRIVATE_KEY }}" > ~/.ssh/id_rsa_deploy
+          # Если секрет хранит ключ в виде \n-экранированных переносов,
+          # замените предыдущую строку на: printf "%b" "${{ secrets.SSH_PRIVATE_KEY }}" > ~/.ssh/id_rsa_deploy
+          chmod 600 ~/.ssh/id_rsa_deploy
 
-      #Копируем новый билд на сервер
+      # (опционально) проверить соединение — быстрый тест
+      - name: Test SSH connection
+        run: ssh -o StrictHostKeyChecking=no -i ~/.ssh/id_rsa_deploy ${{ secrets.REG_USER }}@${{ secrets.REG_HOST }} "whoami && pwd"
+
+      # Копируем билд на сервер
       - name: Upload build to server
         uses: appleboy/scp-action@v0.1.0
         with:
           host: ${{ secrets.REG_HOST }}
           username: ${{ secrets.REG_USER }}
-          key: ${{ secrets.SSH_PRIVATE_KEY }}
+          key_path: ~/.ssh/id_rsa_deploy
           port: 22
           source: 'dist/'
           target: '/var/www/u3121364/data/www/zoo-chat.xyz/'
+          strip_components: 0
+          rm: true
