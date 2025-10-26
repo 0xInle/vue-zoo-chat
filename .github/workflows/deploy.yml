@@ -1,0 +1,35 @@
+name: Deploy Vue Build
+
+on:
+  workflow_dispatch:
+
+jobs:
+  deploy:
+    runs-on: ubuntu-latest
+
+    steps:
+      # 1. Клонируем репозиторий
+      - uses: actions/checkout@v3
+
+      # 2. Устанавливаем Node.js
+      - name: Setup Node.js
+        uses: actions/setup-node@v3
+        with:
+          node-version: '20'
+
+      # 3. Устанавливаем зависимости
+      - run: npm install
+
+      # 4. Собираем продакшн-билд
+      - run: npm run build
+
+      # 5. Устанавливаем SSH ключ
+      - name: Install SSH Key
+        uses: shimataro/ssh-key-action@v2.3.1
+        with:
+          key: ${{ secrets.SSH_PRIVATE_KEY }}
+          known_hosts: ${{ secrets.REG_HOST }}
+
+      # 6. Копируем билд на сервер
+      - name: Deploy Build via SCP
+        run: scp -r dist/* ${{ secrets.REG_USER }}@${{ secrets.REG_HOST }}:/var/www/u3121364/data/www/zoo-chat.xyz/
