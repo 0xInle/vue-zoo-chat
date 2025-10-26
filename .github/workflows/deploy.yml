@@ -26,7 +26,7 @@ jobs:
       - name: Build project
         run: npm run build
 
-      # Чистим старые файлы на сервере
+      #Чистим старые файлы на сервере
       # - name: Clean remote directory
       #   uses: appleboy/ssh-action@v0.1.8
       #   with:
