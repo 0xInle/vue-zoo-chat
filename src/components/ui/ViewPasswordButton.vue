@@ -7,7 +7,7 @@
 
 <script setup>
 import IconEyeOpen from '../../assets/icons/icon-eye-open.svg'
-import IconEyeClose from '../../assets/icons/icon-eye-Close.svg'
+import IconEyeClose from '../../assets/icons/icon-eye-close.svg'
 import { defineProps } from 'vue'
 
 const props = defineProps({ showPassword: Boolean })
