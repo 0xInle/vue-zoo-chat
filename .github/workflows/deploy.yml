@@ -9,7 +9,7 @@ jobs:
     runs-on: ubuntu-latest
 
     steps:
-      #Скачиваем репозиторий
+      # Скачиваем репозиторий
       - uses: actions/checkout@v3
 
       # Устанавливаем Node.js
