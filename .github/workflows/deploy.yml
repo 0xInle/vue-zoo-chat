@@ -43,7 +43,7 @@ jobs:
         with:
           host: ${{ secrets.REG_HOST }}
           username: ${{ secrets.REG_USER }}
-          key: ${{ secrets.REG_SSH_KEY }}
+          key: ${{ secrets.SSH_PRIVATE_KEY }}
           port: 22
           source: 'dist/'
           target: '/var/www/u3121364/data/www/zoo-chat.xyz/'
