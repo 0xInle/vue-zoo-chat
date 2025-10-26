@@ -27,15 +27,15 @@ jobs:
         run: npm run build
 
       # Чистим старые файлы на сервере
-      - name: Clean remote directory
-        uses: appleboy/ssh-action@v0.1.8
-        with:
-          host: ${{ secrets.REG_HOST }}
-          username: ${{ secrets.REG_USER }}
-          key: ${{ secrets.SSH_PRIVATE_KEY }}
-          port: 22
-          script: rm -rf /var/www/u3121364/data/www/zoo-chat.xyz/*
-          passphrase: ''
+      # - name: Clean remote directory
+      #   uses: appleboy/ssh-action@v0.1.8
+      #   with:
+      #     host: ${{ secrets.REG_HOST }}
+      #     username: ${{ secrets.REG_USER }}
+      #     key: ${{ secrets.SSH_PRIVATE_KEY }}
+      #     port: 22
+      #     script: rm -rf /var/www/u3121364/data/www/zoo-chat.xyz/*
+      #     passphrase: ''
 
       # Копируем новый билд на сервер
       - name: Upload build to server
